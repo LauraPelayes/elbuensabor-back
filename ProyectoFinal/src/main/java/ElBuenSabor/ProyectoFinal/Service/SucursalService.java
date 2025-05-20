@@ -11,4 +11,5 @@ public interface SucursalService extends BaseService<Sucursal, Long> {
     // Métodos para obtener sucursales con sus detalles (ej. categorías, promociones)
     List<SucursalDTO> findAllSucursalesConDetalles() throws Exception;
     SucursalDTO findSucursalByIdConDetalles(Long id) throws Exception;
+    //boolean existsById(Long id);
 }

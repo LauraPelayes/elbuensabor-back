@@ -26,6 +26,15 @@ public abstract class BaseServiceImpl<E extends BaseEntity, ID extends Serializa
     }
 
     @Override
+    public boolean existsById(ID id) throws Exception {
+        try {
+            return baseRepository.existsById(id);
+        } catch (Exception e) {
+            throw new Exception("Error al verificar existencia por ID: " + id, e);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Optional<E> findById(ID id) throws Exception {
         try {

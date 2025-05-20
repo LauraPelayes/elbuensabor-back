@@ -12,4 +12,5 @@ public interface BaseService<E extends BaseEntity, ID extends Serializable> {
     E save(E entity) throws Exception;
     E update(ID id, E entity) throws Exception;
     boolean delete(ID id) throws Exception;
+    boolean existsById(ID id) throws Exception;
 }
