@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -117,7 +118,7 @@ public class CategoriaServiceImpl extends BaseServiceImpl<Categoria, Long> imple
                 }
                 categoria.setSucursales(nuevasSucursales);
                 for(Sucursal s : nuevasSucursales) {
-                    if(s.getCategorias() == null) s.setCategorias(new HashSet<>()); // Asegurar inicialización
+                    if(s.getCategorias() == null) s.setCategorias(new ArrayList<>()); // Asegurar inicialización
                     s.getCategorias().add(categoria); // Añadir a la nueva sucursal
                 }
             } else {

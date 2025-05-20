@@ -24,10 +24,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
     private final ArticuloInsumoRepository articuloInsumoRepository;
     private final ArticuloManufacturadoRepository articuloManufacturadoRepository;
     private final DetallePedidoRepository detallePedidoRepository;
-    private final FacturaRepository facturaRepository; // Para crear factura si es necesario
-
-    // Autowired para el Mapper si decides usar uno (ej. ModelMapper)
-    // private final ModelMapper modelMapper;
+    private final FacturaRepository facturaRepository;
 
     @Autowired
     public PedidoServiceImpl(PedidoRepository pedidoRepository,
@@ -37,8 +34,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                              ArticuloInsumoRepository articuloInsumoRepository,
                              ArticuloManufacturadoRepository articuloManufacturadoRepository,
                              DetallePedidoRepository detallePedidoRepository,
-                             FacturaRepository facturaRepository
-            /* ModelMapper modelMapper */) {
+                             FacturaRepository facturaRepository) {
         super(pedidoRepository);
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
@@ -48,7 +44,6 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
         this.articuloManufacturadoRepository = articuloManufacturadoRepository;
         this.detallePedidoRepository = detallePedidoRepository;
         this.facturaRepository = facturaRepository;
-        // this.modelMapper = modelMapper;
     }
 
     @Override
@@ -65,18 +60,23 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
             Sucursal sucursal = sucursalRepository.findById(pedidoCreateDTO.getSucursalId())
                     .orElseThrow(() -> new Exception("Sucursal no encontrada con ID: " + pedidoCreateDTO.getSucursalId()));
 
-            Domicilio domicilioEntrega = null;
+            Domicilio domicilioParaElPedidoBuilder = null; // Variable que se usará en Pedido.builder()
+
             if (pedidoCreateDTO.getTipoEnvio() == TipoEnvio.DELIVERY) {
                 if (pedidoCreateDTO.getDomicilioEntregaId() == null) {
                     throw new Exception("Se requiere domicilio de entrega para el tipo de envío DELIVERY.");
                 }
-                domicilioEntrega = domicilioRepository.findById(pedidoCreateDTO.getDomicilioEntregaId())
+                // Esta variable es local al bloque if y es final o efectivamente final para la lambda
+                final Domicilio domicilioValidado = domicilioRepository.findById(pedidoCreateDTO.getDomicilioEntregaId())
                         .orElseThrow(() -> new Exception("Domicilio de entrega no encontrado con ID: " + pedidoCreateDTO.getDomicilioEntregaId()));
-                // Validar que el domicilio pertenezca al cliente (opcional, pero recomendado)
-                boolean domicilioValido = cliente.getDomicilios().stream().anyMatch(d -> d.getId().equals(domicilioEntrega.getId()));
+
+                // Validar que el domicilio pertenezca al cliente
+                boolean domicilioValido = cliente.getDomicilios().stream()
+                        .anyMatch(d -> d.getId().equals(domicilioValidado.getId())); // La lambda usa 'domicilioValidado'
                 if (!domicilioValido) {
                     throw new Exception("El domicilio de entrega no pertenece al cliente.");
                 }
+                domicilioParaElPedidoBuilder = domicilioValidado; // Asignar a la variable que usará el builder
             }
 
             Pedido pedido = Pedido.builder()
@@ -86,12 +86,12 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                     .formaPago(pedidoCreateDTO.getFormaPago())
                     .cliente(cliente)
                     .sucursal(sucursal)
-                    .domicilioEntrega(domicilioEntrega)
+                    .domicilioEntrega(domicilioParaElPedidoBuilder) // Usar la variable correcta
                     .detallesPedidos(new HashSet<>())
                     .build();
 
             double totalPedido = 0.0;
-            double totalCostoPedido = 0.0; // Implementar cálculo de costo si es necesario
+            double totalCostoPedido = 0.0;
             int tiempoEstimadoTotal = 0;
 
             Set<DetallePedido> detalles = new HashSet<>();
@@ -99,9 +99,9 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                 if (detalleDTO.getCantidad() <= 0) {
                     throw new Exception("La cantidad en el detalle del pedido debe ser mayor a cero.");
                 }
-                Articulo articulo = null;
-                Double precioVentaUnitario = 0.0;
-                Double precioCostoUnitario = 0.0; // Implementar si se calcula el costo
+                Articulo articulo; // No es necesario inicializar a null si siempre se asigna en los if/else if
+                Double precioVentaUnitario;
+                // Double precioCostoUnitario = 0.0; // Implementar si se calcula el costo
 
                 if (detalleDTO.getArticuloManufacturadoId() != null) {
                     ArticuloManufacturado manufacturado = articuloManufacturadoRepository.findById(detalleDTO.getArticuloManufacturadoId())
@@ -109,7 +109,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                     articulo = manufacturado;
                     precioVentaUnitario = manufacturado.getPrecioVenta();
                     tiempoEstimadoTotal += manufacturado.getTiempoEstimadoMinutos() != null ? manufacturado.getTiempoEstimadoMinutos() : 0;
-                    // Lógica para restar stock de insumos del manufacturado
+
                     for(ArticuloManufacturadoDetalle amd : manufacturado.getDetalles()){
                         ArticuloInsumo insumoComponente = amd.getArticuloInsumo();
                         double cantidadRequerida = amd.getCantidad() * detalleDTO.getCantidad();
@@ -125,7 +125,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                             .orElseThrow(() -> new Exception("Artículo Insumo no encontrado con ID: " + detalleDTO.getArticuloInsumoId()));
                     articulo = insumo;
                     precioVentaUnitario = insumo.getPrecioVenta();
-                    // Restar stock de insumo (si es venta directa y no para elaborar)
+
                     if (insumo.getStockActual() < detalleDTO.getCantidad()) {
                         throw new Exception("Stock insuficiente para el insumo: " + insumo.getDenominacion());
                     }
@@ -138,7 +138,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                 DetallePedido detallePedido = DetallePedido.builder()
                         .cantidad(detalleDTO.getCantidad())
                         .subTotal(precioVentaUnitario * detalleDTO.getCantidad())
-                        .pedido(pedido)
+                        .pedido(pedido) // Establecer la relación bidireccional
                         .build();
 
                 if(articulo instanceof ArticuloManufacturado) {
@@ -147,25 +147,34 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                     detallePedido.setArticuloInsumo((ArticuloInsumo) articulo);
                 }
 
-                detalles.add(detallePedido);
+                detalles.add(detallePedido); // Añadir a la colección de detalles del pedido
                 totalPedido += detallePedido.getSubTotal();
             }
 
-            pedido.setDetallesPedidos(detalles); // Asignar los detalles creados
-            pedido.setTotal(totalPedido);
-            pedido.setTotalCosto(totalCostoPedido); // Asignar costo calculado
+            // Es importante guardar el pedido ANTES de intentar guardar los detalles si DetallePedido
+            // tiene una FK a Pedido y no estás usando CascadeType.PERSIST o ALL desde Pedido a DetallePedido
+            // de una manera que JPA maneje la persistencia de los detalles automáticamente al guardar el pedido.
+            // Sin embargo, como estamos construyendo los DetallePedido con la referencia al 'pedido' (que aún no tiene ID),
+            // es mejor guardar el pedido primero, luego los detalles (o configurar CascadeType.ALL en Pedido.detallesPedidos).
 
-            // Calcular hora estimada de finalización (simplificado)
-            // Podría ser más complejo: considerar horario sucursal, carga de trabajo, etc.
-            if (tiempoEstimadoTotal == 0 && !detalles.isEmpty()) tiempoEstimadoTotal = 15; // Un default si solo son insumos
+            // Si Pedido.detallesPedidos tiene CascadeType.ALL (o PERSIST y MERGE),
+            // al asignar 'detalles' a 'pedido' y guardar 'pedido', los detalles también se guardarán.
+            pedido.setDetallesPedidos(detalles);
+            pedido.setTotal(totalPedido);
+            pedido.setTotalCosto(totalCostoPedido);
+
+            if (tiempoEstimadoTotal == 0 && !detalles.isEmpty()) tiempoEstimadoTotal = 15;
             pedido.setHoraEstimadaFinalizacion(LocalTime.now().plusMinutes(tiempoEstimadoTotal));
 
             Pedido savedPedido = pedidoRepository.save(pedido);
 
-            // Guardar detalles explícitamente si la cascada no está configurada de Pedido a DetallePedido
-            // o si se prefiere mayor control. Con CascadeType.ALL en Pedido.detallesPedidos, el save de pedido los guardaría.
-            // Si no, se necesitaría:
-            // detalles.forEach(detallePedidoRepository::save);
+            // Si no usas CascadeType.ALL en Pedido.detallesPedidos o quieres ser explícito:
+            // for (DetallePedido dp : savedPedido.getDetallesPedidos()) {
+            //    dp.setPedido(savedPedido); // Asegurar que la referencia al pedido persistido esté en cada detalle
+            //    detallePedidoRepository.save(dp); // Guardar cada detalle individualmente
+            // }
+            // Pero con CascadeType.ALL en la relación OneToMany de Pedido a DetallePedido,
+            // el save(pedido) anterior ya debería haber persistido los detalles.
 
             return convertToDto(savedPedido);
 
@@ -174,23 +183,22 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
         }
     }
 
+    // ... (resto de los métodos de PedidoServiceImpl como cambiarEstadoPedido, convertToDto, etc.)
+    // Asegúrate de que el método reponerStockPorPedido y cambiarEstadoPedido estén completos y correctos.
+    // El método convertToDto también debe estar presente y funcionar como se espera.
+
     @Override
     @Transactional
     public PedidoResponseDTO cambiarEstadoPedido(Long pedidoId, Estado nuevoEstado) throws Exception {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new Exception("Pedido no encontrado con ID: " + pedidoId));
 
-        // Aquí podrías añadir lógica de validación de transición de estados
-        // Ej: no se puede pasar de ENTREGADO a EN_COCINA
-        // Ej: si se cancela, reponer stock.
-
         if (pedido.getEstado() == Estado.CANCELADO || pedido.getEstado() == Estado.RECHAZADO || pedido.getEstado() == Estado.ENTREGADO) {
-            if (nuevoEstado != pedido.getEstado()) { // Solo permitir cambiar si el estado es el mismo (ej. re-abrir logs o similar)
+            if (nuevoEstado != pedido.getEstado()) {
                 throw new Exception("No se puede cambiar el estado de un pedido que ya está " + pedido.getEstado());
             }
         }
 
-        // Lógica de reposición de stock si se cancela/rechaza un pedido que ya había descontado stock
         if ((nuevoEstado == Estado.CANCELADO || nuevoEstado == Estado.RECHAZADO) &&
                 (pedido.getEstado() != Estado.CANCELADO && pedido.getEstado() != Estado.RECHAZADO)) {
             reponerStockPorPedido(pedido);
@@ -198,32 +206,28 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
 
         pedido.setEstado(nuevoEstado);
 
-        // Si el estado es ENTREGADO y formaPago es MERCADO_PAGO (o cualquier otra que requiera factura automática)
-        // y aún no tiene factura, se podría generar aquí.
         if (nuevoEstado == Estado.ENTREGADO && pedido.getFactura() == null) {
-            // Crear factura (lógica simplificada)
             Factura factura = Factura.builder()
                     .fechaFacturacion(LocalDate.now())
                     .formaPago(pedido.getFormaPago())
                     .totalVenta(pedido.getTotal())
-                    // .mpPaymentId(), etc. se llenarían si viene de una pasarela de pago
                     .build();
-            // pedido.setFactura(factura); // JPA se encarga de la FK si Factura tiene @OneToOne(mappedBy="factura") en Pedido
-            // O si Pedido es dueño de la relación:
             Factura savedFactura = facturaRepository.save(factura);
             pedido.setFactura(savedFactura);
-
         }
 
         return convertToDto(pedidoRepository.save(pedido));
     }
 
     private void reponerStockPorPedido(Pedido pedido) throws Exception {
+        if (pedido.getDetallesPedidos() == null) return; // Seguridad adicional
         for (DetallePedido detalle : pedido.getDetallesPedidos()) {
             if (detalle.getArticuloManufacturado() != null) {
                 ArticuloManufacturado manufacturado = detalle.getArticuloManufacturado();
+                if (manufacturado.getDetalles() == null) continue; // Seguridad adicional
                 for (ArticuloManufacturadoDetalle amd : manufacturado.getDetalles()) {
                     ArticuloInsumo insumoComponente = amd.getArticuloInsumo();
+                    if (insumoComponente == null) continue; // Seguridad adicional
                     double cantidadAReponer = amd.getCantidad() * detalle.getCantidad();
                     insumoComponente.setStockActual(insumoComponente.getStockActual() + cantidadAReponer);
                     articuloInsumoRepository.save(insumoComponente);
@@ -239,14 +243,14 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
 
     @Override
     @Transactional(readOnly = true)
-    public List<PedidoResponseDTO> findByClienteId(Long clienteId) throws Exception { //
+    public List<PedidoResponseDTO> findByClienteId(Long clienteId) throws Exception {
         List<Pedido> pedidos = pedidoRepository.findByClienteId(clienteId);
         return pedidos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PedidoResponseDTO> findByEstado(Estado estado) throws Exception { //
+    public List<PedidoResponseDTO> findByEstado(Estado estado) throws Exception {
         List<Pedido> pedidos = pedidoRepository.findByEstado(estado);
         return pedidos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
@@ -266,8 +270,6 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
         return pedidos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
-    // --- Private DTO Converter ---
-    // Este es un ejemplo. Idealmente, usarías una librería de Mapeo como ModelMapper o MapStruct.
     private PedidoResponseDTO convertToDto(Pedido pedido) {
         if (pedido == null) return null;
 
@@ -282,20 +284,17 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
         dto.setFechaPedido(pedido.getFechaPedido());
 
         if (pedido.getCliente() != null) {
-            // Usar un ClienteSimpleDTO o el ClienteResponseDTO que ya definimos
-            ClienteResponseDTO clienteDTO = new ClienteResponseDTO(); // Mapear campos de Cliente a ClienteResponseDTO
+            ClienteResponseDTO clienteDTO = new ClienteResponseDTO();
             clienteDTO.setId(pedido.getCliente().getId());
             clienteDTO.setNombre(pedido.getCliente().getNombre());
             clienteDTO.setApellido(pedido.getCliente().getApellido());
             clienteDTO.setEmail(pedido.getCliente().getEmail());
             clienteDTO.setTelefono(pedido.getCliente().getTelefono());
-            // ... otros campos necesarios del cliente
             dto.setCliente(clienteDTO);
         }
 
         if (pedido.getDomicilioEntrega() != null) {
-            // Usar DomicilioDTO
-            DomicilioDTO domicilioDTO = new DomicilioDTO(); // Mapear campos
+            DomicilioDTO domicilioDTO = new DomicilioDTO();
             domicilioDTO.setId(pedido.getDomicilioEntrega().getId());
             domicilioDTO.setCalle(pedido.getDomicilioEntrega().getCalle());
             domicilioDTO.setNumero(pedido.getDomicilioEntrega().getNumero());
@@ -304,27 +303,36 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                 LocalidadDTO localidadDTO = new LocalidadDTO();
                 localidadDTO.setId(pedido.getDomicilioEntrega().getLocalidad().getId());
                 localidadDTO.setNombre(pedido.getDomicilioEntrega().getLocalidad().getNombre());
-                // Mapear Provincia y Pais si es necesario en LocalidadDTO
+                if (pedido.getDomicilioEntrega().getLocalidad().getProvincia() != null) {
+                    ProvinciaDTO provinciaDTO = new ProvinciaDTO();
+                    provinciaDTO.setId(pedido.getDomicilioEntrega().getLocalidad().getProvincia().getId());
+                    provinciaDTO.setNombre(pedido.getDomicilioEntrega().getLocalidad().getProvincia().getNombre());
+                    if (pedido.getDomicilioEntrega().getLocalidad().getProvincia().getPais() != null) {
+                        PaisDTO paisDTO = new PaisDTO();
+                        paisDTO.setId(pedido.getDomicilioEntrega().getLocalidad().getProvincia().getPais().getId());
+                        paisDTO.setNombre(pedido.getDomicilioEntrega().getLocalidad().getProvincia().getPais().getNombre());
+                        provinciaDTO.setPais(paisDTO);
+                    }
+                    localidadDTO.setProvincia(provinciaDTO);
+                }
                 domicilioDTO.setLocalidad(localidadDTO);
             }
             dto.setDomicilioEntrega(domicilioDTO);
         }
 
         if (pedido.getSucursal() != null) {
-            SucursalDTO sucursalDTO = new SucursalDTO(); // Mapear campos de Sucursal a SucursalDTO
+            SucursalDTO sucursalDTO = new SucursalDTO();
             sucursalDTO.setId(pedido.getSucursal().getId());
             sucursalDTO.setNombre(pedido.getSucursal().getNombre());
-            // ... otros campos necesarios de la sucursal
             dto.setSucursal(sucursalDTO);
         }
 
         if (pedido.getFactura() != null) {
-            FacturaDTO facturaDTO = new FacturaDTO(); // Mapear campos de Factura a FacturaDTO
+            FacturaDTO facturaDTO = new FacturaDTO();
             facturaDTO.setId(pedido.getFactura().getId());
             facturaDTO.setFechaFacturacion(pedido.getFactura().getFechaFacturacion());
             facturaDTO.setTotalVenta(pedido.getFactura().getTotalVenta());
             facturaDTO.setFormaPago(pedido.getFactura().getFormaPago());
-            // ... otros campos de factura
             dto.setFactura(facturaDTO);
         }
 
@@ -335,21 +343,17 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
                 detalleDTO.setCantidad(detalle.getCantidad());
                 detalleDTO.setSubTotal(detalle.getSubTotal());
                 if (detalle.getArticuloManufacturado() != null) {
-                    // Mapear ArticuloManufacturado a ArticuloManufacturadoDTO (o simple DTO)
                     ArticuloManufacturadoDTO amDto = new ArticuloManufacturadoDTO();
                     amDto.setId(detalle.getArticuloManufacturado().getId());
                     amDto.setDenominacion(detalle.getArticuloManufacturado().getDenominacion());
                     amDto.setPrecioVenta(detalle.getArticuloManufacturado().getPrecioVenta());
-                    //...
                     detalleDTO.setArticuloManufacturado(amDto);
                 }
                 if (detalle.getArticuloInsumo() != null) {
-                    // Mapear ArticuloInsumo a ArticuloInsumoDTO (o simple DTO)
                     ArticuloInsumoDTO aiDto = new ArticuloInsumoDTO();
                     aiDto.setId(detalle.getArticuloInsumo().getId());
                     aiDto.setDenominacion(detalle.getArticuloInsumo().getDenominacion());
                     aiDto.setPrecioVenta(detalle.getArticuloInsumo().getPrecioVenta());
-                    //...
                     detalleDTO.setArticuloInsumo(aiDto);
                 }
                 return detalleDTO;

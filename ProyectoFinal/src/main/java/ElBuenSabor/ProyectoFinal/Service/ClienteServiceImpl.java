@@ -36,7 +36,7 @@ public class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implement
     @Autowired
     public ClienteServiceImpl(ClienteRepository clienteRepository, DomicilioRepository domicilioRepository,
                               LocalidadRepository localidadRepository, ProvinciaRepository provinciaRepository,
-                              PaisRepository paisRepository, PasswordEncoder passwordEncoder,
+                              PaisRepository paisRepository, PasswordEncoder passwordEncoder,//Error passwordEncoder: Could not autowire. No beans of 'PasswordEncoder' type found.(Habia que terminar de configurar SpringSecurity, por ahora hice un Bean en el main de PasswordEncoder
                               ImagenRepository imagenRepository) { // ImagenRepository inyectado
         super(clienteRepository);
         this.clienteRepository = clienteRepository;
@@ -162,7 +162,8 @@ public class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implement
         }
 
         // Actualizar imagen (opcional)
-        if (actualizacionDTO.getImagenId() != null) {
+        //if (actualizacionDTO.getImagenId() != null) {
+        if (actualizacionDTO.getImagenId() != 0) {
             if(actualizacionDTO.getImagenId() == 0L) { // Convención para quitar la imagen
                 cliente.setImagen(null);
             } else {

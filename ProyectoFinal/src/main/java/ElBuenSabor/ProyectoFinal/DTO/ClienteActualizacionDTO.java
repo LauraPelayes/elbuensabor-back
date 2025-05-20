@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,6 +29,9 @@ public class ClienteActualizacionDTO {
     private String currentPassword;
     private String newPassword;
     private String confirmNewPassword;
+
+    private LocalDate fechaNacimiento;
+    private long ImagenId;
 
     // Consider adding fechaNacimiento if it's updatable
     //private java.time.LocalDate fechaNacimiento;
