@@ -4,6 +4,7 @@ import ElBuenSabor.ProyectoFinal.Entities.Pais;
 import ElBuenSabor.ProyectoFinal.Entities.Provincia;
 import ElBuenSabor.ProyectoFinal.Repositories.*;
 import ElBuenSabor.ProyectoFinal.Service.BaseServiceImpl;
+//import ElBuenSabor.ProyectoFinal.Service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder; // Necesario para encriptar contraseñas
 import org.springframework.stereotype.Service;
@@ -11,10 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Service
-public class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implements ClienteService {
+//@Service
+//ublic class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implements ClienteService {
 
-    private final ClienteRepository clienteRepository;
+  /*  private final ClienteRepository clienteRepository;
     private final DomicilioRepository domicilioRepository;
     private final LocalidadRepository localidadRepository;
     private final ProvinciaRepository provinciaRepository;
@@ -245,4 +246,4 @@ public class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implement
         String emailRegex \= "^\[a\-zA\-Z0\-9\_\+&\*\-\]\+\(?\:\\\\\.\[a\-zA\-Z0\-9\_\+&\*\-\]\+\)\*@\(?\:\[a\-zA\-Z0\-9\-\]\+\\\\\.\)\+\[a\-zA\-Z\]\{2,7\}</span>";
         return email.matches(emailRegex);
     }
-}
+}*/

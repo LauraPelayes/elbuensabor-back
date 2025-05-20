@@ -2,10 +2,10 @@ package ElBuenSabor.ProyectoFinal.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.util.HashSet;
 import java.time.LocalTime;
 import java.util.List;
-
+import java.util.Set;
 @Entity
 @Table(name = "sucursal")
 @NoArgsConstructor
@@ -36,4 +36,12 @@ public class Sucursal extends BaseEntity {
 
     @OneToMany(mappedBy = "sucursal")
     private List<Pedido>pedidos;
+
+    @ManyToMany
+    @JoinTable(
+            name = "sucursal_promocion", // Nombre de la tabla de unión
+            joinColumns = @JoinColumn(name = "sucursal_id"),
+            inverseJoinColumns = @JoinColumn(name = "promocion_id")
+    )
+    private Set<Promocion> promociones = new HashSet<>();
 }

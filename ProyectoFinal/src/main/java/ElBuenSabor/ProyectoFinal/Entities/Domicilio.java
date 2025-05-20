@@ -25,6 +25,6 @@ public class Domicilio extends BaseEntity {
     @JoinColumn(name = "localidad_id")
     private Localidad localidad;
 
-    @OneToMany(mappedBy = "domicilio")
-    private List<Pedido> pedidos;
+    @OneToMany(mappedBy = "domicilioEntrega", cascade = CascadeType.ALL, orphanRemoval = true) // <--- ¡Aquí está el error!
+    private Set<Pedido> pedidos = new HashSet<>();
 }

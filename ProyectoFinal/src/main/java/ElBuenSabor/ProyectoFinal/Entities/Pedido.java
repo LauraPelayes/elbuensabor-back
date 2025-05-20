@@ -52,4 +52,7 @@ public class Pedido extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "sucursal_id")
     private Sucursal sucursal; // Un pedido se realiza en una sucursal
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 }

@@ -28,6 +28,4 @@ public abstract class Articulo extends BaseEntity {
     @ManyToOne
     @JoinColumn(name= "unidad_medida_id")
     protected UnidadMedida unidadMedida;
-    @OneToMany(mappedBy = "articulo")
-    private List<DetallePedido> detallesPedido = new ArrayList<>();
 }

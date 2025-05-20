@@ -18,7 +18,7 @@ public abstract class Usuario extends BaseEntity {
     private String auth0Id; // ID de autenticación, por si usas Auth0 o similar
     @Column(unique = true)
     private String username; // Podría ser el email
-    @OneToMany(mappedBy = "sucursal")
+    @OneToMany(mappedBy = "usuario")
     private List<Pedido>pedidos;
     // Para el Módulo I, el email será clave, y la contraseña encriptada.
     // auth0Id y username pueden ser útiles para integraciones futuras
