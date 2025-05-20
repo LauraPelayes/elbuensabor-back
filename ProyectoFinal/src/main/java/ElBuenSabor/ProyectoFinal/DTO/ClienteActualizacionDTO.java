@@ -9,18 +9,25 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteRegistroDTO {
+public class ClienteActualizacionDTO {
+    // Datos personales
     private String nombre;
     private String apellido;
     private String telefono;
-    private String email;
-    private String password;
-    private String confirmPassword;
+
+    // Datos de domicilio (opcionales, solo si se actualizan)
     private String calle;
     private Integer numero;
     private Integer cp;
     private String nombreLocalidad;
     private String nombreProvincia;
     private String nombrePais;
-    private java.time.LocalDate fechaNacimiento;
+
+    // Para cambio de contraseña (opcionales)
+    private String currentPassword;
+    private String newPassword;
+    private String confirmNewPassword;
+
+    // Consider adding fechaNacimiento if it's updatable
+    //private java.time.LocalDate fechaNacimiento;
 }
