@@ -1,5 +1,7 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,5 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PaisDTO {
     private Long id;
+
+    @NotBlank(message = "El nombre del país es obligatorio")
+    @Size(min = 2, max = 100, message = "El nombre del país debe tener entre 2 y 100 caracteres")
     private String nombre;
 }

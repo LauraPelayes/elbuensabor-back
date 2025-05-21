@@ -18,4 +18,7 @@ public class ProyectoFinalApplication {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(); // Usamos BCrypt, una implementación fuerte y estándar
 	}
+
+
+
 }
