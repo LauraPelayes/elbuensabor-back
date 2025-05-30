@@ -284,13 +284,7 @@ public class ArticuloController {
         dto.setTiempoEstimadoMinutos(manufacturado.getTiempoEstimadoMinutos());
         dto.setPreparacion(manufacturado.getPreparacion());
 
-        if (manufacturado.getUnidadMedida() != null) {
-            dto.setUnidadMedidaId(manufacturado.getUnidadMedida().getId());
-            UnidadMedidaDTO umDto = new UnidadMedidaDTO();
-            umDto.setId(manufacturado.getUnidadMedida().getId());
-            umDto.setDenominacion(manufacturado.getUnidadMedida().getDenominacion());
-            dto.setUnidadMedida(umDto);
-        }
+
         if (manufacturado.getCategoria() != null) {
             dto.setCategoriaId(manufacturado.getCategoria().getId());
             CategoriaDTO catDto = new CategoriaDTO();

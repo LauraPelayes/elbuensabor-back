@@ -24,7 +24,7 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
     private final ArticuloManufacturadoRepository articuloManufacturadoRepository;
     private final CategoriaRepository categoriaRepository;
     private final UnidadMedidaRepository unidadMedidaRepository;
-    private final ImagenRepository imagenRepository; // Para asociar/crear imágenes
+    private final ImagenRepository imagenRepository;
     private final ArticuloManufacturadoDetalleRepository articuloManufacturadoDetalleRepository;
 
 
@@ -46,7 +46,99 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
         this.articuloManufacturadoDetalleRepository = articuloManufacturadoDetalleRepository;
     }
 
-    // --- Métodos para ArticuloInsumo ---
+    // --- Métodos de Borrado Lógico (Correctos) ---
+    @Override
+    @Transactional
+    public void darBajaArticulo(Long id) throws Exception {
+        Optional<Articulo> articuloOptional = articuloRepository.findById(id);
+        if (!articuloOptional.isPresent()) {
+            throw new Exception("Artículo no encontrado con ID: " + id);
+        }
+        Articulo articulo = articuloOptional.get();
+        articulo.setEstaDadoDeBaja(true);
+        articuloRepository.save(articulo);
+    }
+
+    @Override
+    @Transactional
+    public void darAltaArticulo(Long id) throws Exception {
+        Optional<Articulo> articuloOptional = articuloRepository.findById(id);
+        if (!articuloOptional.isPresent()) {
+            throw new Exception("Artículo no encontrado con ID: " + id);
+        }
+        Articulo articulo = articuloOptional.get();
+        articulo.setEstaDadoDeBaja(false);
+        articuloRepository.save(articulo);
+    }
+
+    // --- Sobreescribir findAll y métodos de búsqueda para filtrar por activos ---
+    @Override
+    @Transactional(readOnly = true)
+    public List<Articulo> findAll() throws Exception {
+        return findAllActivos();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Articulo> findAllActivos() throws Exception {
+        try {
+            return articuloRepository.findByEstaDadoDeBajaFalse();
+        } catch (Exception e) {
+            throw new Exception("Error al obtener todos los artículos activos: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArticuloInsumo> findAllArticulosInsumo() throws Exception {
+        return findAllArticulosInsumoActivos();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArticuloInsumo> findAllArticulosInsumoActivos() throws Exception {
+        try {
+            return articuloInsumoRepository.findByEstaDadoDeBajaFalse();
+        } catch (Exception e) {
+            throw new Exception("Error al obtener todos los Artículos Insumo activos: " + e.getMessage(), e);
+        }
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArticuloManufacturado> findAllArticulosManufacturadosActivos() throws Exception {
+        try {
+            return articuloManufacturadoRepository.findByEstaDadoDeBajaFalse();
+        } catch (Exception e) {
+            throw new Exception("Error al obtener todos los Artículos Manufacturados activos: " + e.getMessage(), e);
+        }
+    }
+
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Articulo> findByDenominacionContainingIgnoreCaseActivos(String denominacion) throws Exception {
+        try {
+            return articuloRepository.findByDenominacionContainingIgnoreCaseAndEstaDadoDeBajaFalse(denominacion);
+        } catch (Exception e) {
+            throw new Exception("Error al buscar artículos activos por denominación: " + e.getMessage(), e);
+        }
+    }
+
+ 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Articulo> findByCategoriaIdActivos(Long categoriaId) throws Exception {
+        try {
+            return articuloRepository.findByCategoriaIdAndEstaDadoDeBajaFalse(categoriaId);
+        } catch (Exception e) {
+            throw new Exception("Error al buscar artículos activos por ID de categoría: " + e.getMessage(), e);
+        }
+    }
+
+    // --- Métodos para ArticuloInsumo (se mantienen) ---
     @Override
     @Transactional
     public ArticuloInsumo createArticuloInsumo(ArticuloInsumoDTO dto) throws Exception {
@@ -58,6 +150,7 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
             insumo.setStockActual(dto.getStockActual());
             insumo.setStockMinimo(dto.getStockMinimo());
             insumo.setEsParaElaborar(dto.getEsParaElaborar());
+            insumo.setEstaDadoDeBaja(false); // Asignar explícitamente el estado al crear
 
             Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
                     .orElseThrow(() -> new Exception("Categoría no encontrada con ID: " + dto.getCategoriaId()));
@@ -67,19 +160,23 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
                     .orElseThrow(() -> new Exception("Unidad de Medida no encontrada con ID: " + dto.getUnidadMedidaId()));
             insumo.setUnidadMedida(unidadMedida);
 
-            if (dto.getImagenId() != null) {
-                Imagen imagen = imagenRepository.findById(dto.getImagenId())
-                        .orElseThrow(() -> new Exception("Imagen no encontrada con ID: " + dto.getImagenId()));
-                insumo.setImagen(imagen);
-            } else if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
-                // Crear nueva imagen si se proporciona la denominación (URL)
-                Imagen nuevaImagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
-                insumo.setImagen(imagenRepository.save(nuevaImagen));
+            Imagen imagen = null;
+            if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
+                if (dto.getImagen().getId() != null) {
+                    imagen = imagenRepository.findById(dto.getImagen().getId())
+                            .orElseThrow(() -> new Exception("Imagen no encontrada con ID: " + dto.getImagen().getId()));
+                    imagen.setDenominacion(dto.getImagen().getDenominacion());
+                    imagen = imagenRepository.save(imagen);
+                } else {
+                    imagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
+                    imagen = imagenRepository.save(imagen);
+                }
             }
+            insumo.setImagen(imagen);
 
             return articuloInsumoRepository.save(insumo);
         } catch (Exception e) {
-            throw new Exception("Error al crear Artículo Insumo: " + e.getMessage());
+            throw new Exception("Error al crear Artículo Insumo: " + e.getMessage(), e);
         }
     }
 
@@ -109,45 +206,40 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
                 insumo.setUnidadMedida(unidadMedida);
             }
 
-            if (dto.getImagenId() != null) {
-                Imagen imagen = imagenRepository.findById(dto.getImagenId())
-                        .orElseThrow(() -> new Exception("Imagen no encontrada con ID: " + dto.getImagenId()));
-                insumo.setImagen(imagen);
-            } else if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
-                Imagen imagenExistente = insumo.getImagen();
-                if (imagenExistente != null) {
-                    imagenExistente.setDenominacion(dto.getImagen().getDenominacion());
-                    insumo.setImagen(imagenRepository.save(imagenExistente));
+            // Gestión de Imagen (simplificada, solo URL)
+            Imagen imagen = null;
+            if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
+                if (insumo.getImagen() != null && insumo.getImagen().getId() != null) {
+                    imagen = insumo.getImagen();
+                    imagen.setDenominacion(dto.getImagen().getDenominacion());
+                    imagen = imagenRepository.save(imagen);
                 } else {
-                    Imagen nuevaImagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
-                    insumo.setImagen(imagenRepository.save(nuevaImagen));
+                    imagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
+                    imagen = imagenRepository.save(imagen);
                 }
+            } else {
+                if (insumo.getImagen() != null) {
+                    imagenRepository.delete(insumo.getImagen());
+                }
+                imagen = null;
             }
-
+            insumo.setImagen(imagen);
 
             return articuloInsumoRepository.save(insumo);
         } catch (Exception e) {
-            throw new Exception("Error al actualizar Artículo Insumo: " + e.getMessage());
+            throw new Exception("Error al actualizar Artículo Insumo: " + e.getMessage(), e);
         }
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ArticuloInsumo> findAllArticulosInsumo() throws Exception {
-        try {
-            return articuloInsumoRepository.findAll();
-        } catch (Exception e) {
-            throw new Exception("Error al obtener todos los Artículos Insumo: " + e.getMessage());
-        }
-    }
+
 
     @Override
     @Transactional(readOnly = true)
     public List<ArticuloInsumo> findArticulosInsumoByStockActualLessThanEqual(Double stockMinimo) throws Exception {
         try {
-            return articuloInsumoRepository.findByStockActualLessThanEqual(stockMinimo); //
+            return articuloInsumoRepository.findByStockActualLessThanEqual(stockMinimo);
         } catch (Exception e) {
-            throw new Exception("Error al buscar artículos por stock mínimo: " + e.getMessage());
+            throw new Exception("Error al buscar artículos por stock mínimo: " + e.getMessage(), e);
         }
     }
 
@@ -156,67 +248,58 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
     @Transactional
     public ArticuloManufacturado createArticuloManufacturado(ArticuloManufacturadoDTO dto) throws Exception {
         try {
+            if (dto.getDetalles() == null || dto.getDetalles().isEmpty()) {
+                throw new Exception("Un artículo manufacturado debe tener al menos un ingrediente.");
+            }
+
             ArticuloManufacturado manufacturado = new ArticuloManufacturado();
             manufacturado.setDenominacion(dto.getDenominacion());
             manufacturado.setPrecioVenta(dto.getPrecioVenta());
             manufacturado.setDescripcion(dto.getDescripcion());
             manufacturado.setTiempoEstimadoMinutos(dto.getTiempoEstimadoMinutos());
             manufacturado.setPreparacion(dto.getPreparacion());
+            manufacturado.setEstaDadoDeBaja(false);
 
             Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
                     .orElseThrow(() -> new Exception("Categoría no encontrada con ID: " + dto.getCategoriaId()));
             manufacturado.setCategoria(categoria);
 
-            // Para ArticuloManufacturado, la unidad de medida suele ser "Unidad" o similar por defecto.
-            // Si se envía explícitamente, se usa; si no, se podría buscar una por defecto o permitir nulo.
-            if(dto.getUnidadMedidaId() != null) {
-                UnidadMedida unidadMedida = unidadMedidaRepository.findById(dto.getUnidadMedidaId())
-                        .orElseThrow(() -> new Exception("Unidad de Medida no encontrada con ID: " + dto.getUnidadMedidaId()));
-                manufacturado.setUnidadMedida(unidadMedida);
-            } else {
-                // Opcional: buscar y asignar una unidad de medida por defecto como "Unidad"
-                UnidadMedida unidadPorDefecto = unidadMedidaRepository.findByDenominacion("Unidad");
-                if (unidadPorDefecto == null) {
-                    unidadPorDefecto = unidadMedidaRepository.save(UnidadMedida.builder().denominacion("Unidad").build());
+            // Gestión de Imagen (directamente desde la URL del DTO)
+            Imagen imagen = null;
+            if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
+                if (dto.getImagen().getId() != null) {
+                    imagen = imagenRepository.findById(dto.getImagen().getId())
+                            .orElseThrow(() -> new Exception("Imagen no encontrada con ID: " + dto.getImagen().getId()));
+                    imagen.setDenominacion(dto.getImagen().getDenominacion());
+                    imagen = imagenRepository.save(imagen);
+                } else {
+                    imagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
+                    imagen = imagenRepository.save(imagen);
                 }
-                manufacturado.setUnidadMedida(unidadPorDefecto);
             }
+            manufacturado.setImagen(imagen);
 
-
-            if (dto.getImagenId() != null) {
-                Imagen imagen = imagenRepository.findById(dto.getImagenId())
-                        .orElseThrow(() -> new Exception("Imagen no encontrada con ID: " + dto.getImagenId()));
-                manufacturado.setImagen(imagen);
-            } else if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
-                Imagen nuevaImagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
-                manufacturado.setImagen(imagenRepository.save(nuevaImagen));
-            }
-
-            // Guardar el manufacturado antes de los detalles para tener su ID
-            ArticuloManufacturado savedManufacturado = articuloManufacturadoRepository.save(manufacturado);
-
-
+            Set<ArticuloManufacturadoDetalle> detallesSet = new HashSet<>();
             if (dto.getDetalles() != null && !dto.getDetalles().isEmpty()) {
-                Set<ArticuloManufacturadoDetalle> detallesSet = new HashSet<>();
                 for (ArticuloManufacturadoDetalleDTO detalleDTO : dto.getDetalles()) {
                     ArticuloInsumo insumo = articuloInsumoRepository.findById(detalleDTO.getArticuloInsumoId())
                             .orElseThrow(() -> new Exception("Artículo Insumo para detalle no encontrado con ID: " + detalleDTO.getArticuloInsumoId()));
-                    ArticuloManufacturadoDetalle detalle = ArticuloManufacturadoDetalle.builder()
-                            .cantidad(detalleDTO.getCantidad())
-                            .articuloInsumo(insumo)
-                            // La relación con ArticuloManufacturado se establece al añadir al set de la entidad padre
-                            // o se puede setear aquí si el JoinColumn está en ArticuloManufacturadoDetalle
-                            .build();
-                    // detalle.setArticuloManufacturado(savedManufacturado); // Si el JoinColumn está en Detalle
-                    detallesSet.add(articuloManufacturadoDetalleRepository.save(detalle));
+
+                    ArticuloManufacturadoDetalle detalle = new ArticuloManufacturadoDetalle();
+                    detalle.setCantidad(detalleDTO.getCantidad());
+                    detalle.setArticuloInsumo(insumo);
+                    detalle.setArticuloManufacturado(manufacturado);
+
+                    detallesSet.add(detalle);
                 }
-                savedManufacturado.setDetalles(detallesSet);
+            } else {
+                throw new Exception("El artículo manufacturado debe tener al menos un ingrediente.");
             }
+            manufacturado.setDetalles(detallesSet);
 
-            return articuloManufacturadoRepository.save(savedManufacturado); // Guardar de nuevo con los detalles asociados
-
+            return articuloManufacturadoRepository.save(manufacturado);
         } catch (Exception e) {
-            throw new Exception("Error al crear Artículo Manufacturado: " + e.getMessage());
+            throw new Exception("Error al crear Artículo Manufacturado: " + e.getMessage(), e);
         }
     }
 
@@ -226,6 +309,10 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
         try {
             ArticuloManufacturado manufacturado = articuloManufacturadoRepository.findById(id)
                     .orElseThrow(() -> new Exception("Artículo Manufacturado no encontrado con ID: " + id));
+
+            if (dto.getDetalles() == null || dto.getDetalles().isEmpty()) {
+                throw new Exception("Un artículo manufacturado debe tener al menos un ingrediente para ser actualizado.");
+            }
 
             manufacturado.setDenominacion(dto.getDenominacion());
             manufacturado.setPrecioVenta(dto.getPrecioVenta());
@@ -239,86 +326,55 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
                 manufacturado.setCategoria(categoria);
             }
 
-            if(dto.getUnidadMedidaId() != null) {
-                UnidadMedida unidadMedida = unidadMedidaRepository.findById(dto.getUnidadMedidaId())
-                        .orElseThrow(() -> new Exception("Unidad de Medida no encontrada con ID: " + dto.getUnidadMedidaId()));
-                manufacturado.setUnidadMedida(unidadMedida);
-            }
-
-            if (dto.getImagenId() != null) {
-                Imagen imagen = imagenRepository.findById(dto.getImagenId())
-                        .orElseThrow(() -> new Exception("Imagen no encontrada con ID: " + dto.getImagenId()));
-                manufacturado.setImagen(imagen);
-            } else if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
-                Imagen imagenExistente = manufacturado.getImagen();
-                if (imagenExistente != null) {
-                    imagenExistente.setDenominacion(dto.getImagen().getDenominacion());
-                    manufacturado.setImagen(imagenRepository.save(imagenExistente));
+            // Gestión de Imagen (directamente desde la URL del DTO)
+            Imagen imagen = null;
+            if (dto.getImagen() != null && dto.getImagen().getDenominacion() != null && !dto.getImagen().getDenominacion().isEmpty()) {
+                if (manufacturado.getImagen() != null && manufacturado.getImagen().getId() != null) {
+                    imagen = manufacturado.getImagen();
+                    imagen.setDenominacion(dto.getImagen().getDenominacion());
+                    imagen = imagenRepository.save(imagen);
                 } else {
-                    Imagen nuevaImagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
-                    manufacturado.setImagen(imagenRepository.save(nuevaImagen));
+                    imagen = Imagen.builder().denominacion(dto.getImagen().getDenominacion()).build();
+                    imagen = imagenRepository.save(imagen);
                 }
+            } else {
+                if (manufacturado.getImagen() != null) {
+                    imagenRepository.delete(manufacturado.getImagen());
+                }
+                imagen = null;
             }
+            manufacturado.setImagen(imagen);
 
-            // Manejo de detalles: Borrar existentes y añadir nuevos, o una lógica más compleja de diff.
-            // Opción simple: borrar los detalles antiguos y crear los nuevos.
-            // manufacturado.getDetalles().clear(); // Esto podría necesitar `orphanRemoval=true` y un save previo
-            // O borrar directamente desde el repositorio
-            // Esto puede ser ineficiente. Una mejor aproximación es calcular la diferencia.
-            // Por simplicidad, si se reenvían los detalles, los reemplazaremos.
-
-            // Primero, eliminar los detalles que ya no están o que se van a actualizar.
-            // Esto requiere cuidado para no violar restricciones si ArticuloManufacturadoDetalle no tiene mappedBy a ArticuloManufacturado
-            // Si ArticuloManufacturado es el dueño de la relación con CascadeType.ALL y orphanRemoval=true,
-            // limpiar el set y añadir los nuevos debería funcionar.
-
-            // Guardamos el manufacturado para que se apliquen los orphanRemoval si es el caso
-            // y para actualizar campos básicos.
-            articuloManufacturadoRepository.save(manufacturado); // Salvar antes de manipular colecciones managed
-
-            // Si la colección de detalles es gestionada con orphanRemoval=true en la entidad ArticuloManufacturado:
+            // Manejo de Detalles (Ingredientes): Reemplazo completo de la colección
             if (dto.getDetalles() != null) {
-                // Eliminar detalles que ya no están en el DTO (si es necesario, aquí se simplifica reemplazando)
-                // manufacturado.getDetalles().forEach(detalle -> articuloManufacturadoDetalleRepository.delete(detalle)); // Cuidado con detached entities
-                // manufacturado.getDetalles().clear(); // Si orphanRemoval está bien configurado
-
-                // Para una actualización robusta de la colección de detalles:
-                // 1. Eliminar detalles que ya no existen en el DTO
-                // 2. Actualizar detalles existentes
-                // 3. Añadir nuevos detalles
-                // Por ahora, una implementación más simple: limpiar y añadir
-
-                // Se requiere que la entidad ArticuloManufacturado tenga CascadeType.ALL y orphanRemoval=true para sus 'detalles'
-                // y que ArticuloManufacturadoDetalleRepository.delete sea llamado explícitamente o se maneje la cascada
-                // Limpiar los detalles existentes del manufacturado
-                // Esta es una forma de hacerlo si la relación está bien configurada:
+                // CORRECCIÓN: Manipular la colección existente, no reemplazarla
+                // Paso 1: Limpiar la colección existente. Hibernate sabrá que debe eliminar los huérfanos.
                 if (manufacturado.getDetalles() != null) {
-                    // Es más seguro iterar y eliminar para evitar problemas con la modificación de la colección mientras se itera
-                    Set<ArticuloManufacturadoDetalle> detallesActuales = new HashSet<>(manufacturado.getDetalles());
-                    for(ArticuloManufacturadoDetalle amd : detallesActuales) {
-                        // amd.setArticuloManufacturado(null); // Desvincular si es necesario antes de borrar
-                        articuloManufacturadoDetalleRepository.delete(amd);
-                    }
+                    // Es seguro borrar aquí porque orphanRemoval=true y cascade=ALL están en la relación
                     manufacturado.getDetalles().clear();
                 } else {
+                    // Si la colección era null (ej. lazy-loaded y no accedida), inicialízala
                     manufacturado.setDetalles(new HashSet<>());
                 }
 
-
-                Set<ArticuloManufacturadoDetalle> nuevosDetallesSet = new HashSet<>();
+                // Paso 2: Añadir los nuevos detalles a la colección ahora vacía.
                 for (ArticuloManufacturadoDetalleDTO detalleDTO : dto.getDetalles()) {
                     ArticuloInsumo insumo = articuloInsumoRepository.findById(detalleDTO.getArticuloInsumoId())
                             .orElseThrow(() -> new Exception("Artículo Insumo para detalle no encontrado con ID: " + detalleDTO.getArticuloInsumoId()));
-                    ArticuloManufacturadoDetalle detalle = ArticuloManufacturadoDetalle.builder()
-                            .cantidad(detalleDTO.getCantidad())
-                            .articuloInsumo(insumo)
-                            .build();
-                    // detalle.setArticuloManufacturado(manufacturado); // Si el JoinColumn está en Detalle
-                    nuevosDetallesSet.add(articuloManufacturadoDetalleRepository.save(detalle));
-                }
-                manufacturado.setDetalles(nuevosDetallesSet);
-            }
 
+                    ArticuloManufacturadoDetalle detalle = new ArticuloManufacturadoDetalle();
+                    detalle.setCantidad(detalleDTO.getCantidad());
+                    detalle.setArticuloInsumo(insumo);
+                    detalle.setArticuloManufacturado(manufacturado); // ¡CRUCIAL: Asigna la relación bidireccional aquí!
+
+                    manufacturado.getDetalles().add(detalle); // Añadir a la colección gestionada
+                }
+            } else {
+                // Si el DTO no trae detalles (o trae null), limpiar la colección existente para eliminar todos los detalles.
+                if (manufacturado.getDetalles() != null) {
+                    manufacturado.getDetalles().clear();
+                }
+            }
 
             return articuloManufacturadoRepository.save(manufacturado);
         } catch (Exception e) {
@@ -329,31 +385,38 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
     @Override
     @Transactional(readOnly = true)
     public List<ArticuloManufacturado> findAllArticulosManufacturados() throws Exception {
-        try {
-            return articuloManufacturadoRepository.findAll();
-        } catch (Exception e) {
-            throw new Exception("Error al obtener todos los Artículos Manufacturados: " + e.getMessage());
-        }
+        return findAllArticulosManufacturadosActivos();
     }
 
     // --- Métodos generales de búsqueda ---
     @Override
     @Transactional(readOnly = true)
     public List<Articulo> findByDenominacionContainingIgnoreCase(String denominacion) throws Exception {
-        try {
-            return articuloRepository.findByDenominacionContainingIgnoreCase(denominacion); //
-        } catch (Exception e) {
-            throw new Exception("Error al buscar artículos por denominación: " + e.getMessage());
-        }
+        return findByDenominacionContainingIgnoreCaseActivos(denominacion);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Articulo> findByCategoriaId(Long categoriaId) throws Exception {
+        return findByCategoriaIdActivos(categoriaId);
+    }
+
+    // **IMPORTANTE**: Modificar el método delete(ID id) en BaseService o ArticuloService
+    // para que haga el borrado lógico en lugar del físico.
+    @Override
+    @Transactional
+    public boolean delete(Long id) throws Exception {
         try {
-            return articuloRepository.findByCategoriaId(categoriaId); //
+            Optional<Articulo> articuloOptional = articuloRepository.findById(id);
+            if (!articuloOptional.isPresent()) {
+                throw new Exception("Artículo no encontrado con ID: " + id + " para eliminar.");
+            }
+            Articulo articulo = articuloOptional.get();
+            articulo.setEstaDadoDeBaja(true);
+            articuloRepository.save(articulo);
+            return true;
         } catch (Exception e) {
-            throw new Exception("Error al buscar artículos por ID de categoría: " + e.getMessage());
+            throw new Exception("Error al realizar borrado lógico del artículo: " + e.getMessage(), e);
         }
     }
 }

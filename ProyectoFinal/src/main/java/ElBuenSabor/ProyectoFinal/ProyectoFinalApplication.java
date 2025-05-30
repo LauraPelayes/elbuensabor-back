@@ -13,11 +13,6 @@ public class ProyectoFinalApplication {
 		SpringApplication.run(ProyectoFinalApplication.class, args);
 	}
 
-	// Define el bean de PasswordEncoder aquí
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(); // Usamos BCrypt, una implementación fuerte y estándar
-	}
 
 
 

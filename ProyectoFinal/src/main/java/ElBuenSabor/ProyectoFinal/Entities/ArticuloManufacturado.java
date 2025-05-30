@@ -20,10 +20,8 @@ public class ArticuloManufacturado extends Articulo {
     private Integer tiempoEstimadoMinutos;
     private String preparacion; // Receta
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "articulo_manufacturado_id")
-    private Set<ArticuloManufacturadoDetalle> detalles = new HashSet<>();
+    @OneToMany(mappedBy = "articuloManufacturado", cascade = CascadeType.ALL, orphanRemoval = true) // CASCADE.ALL para guardar/actualizar detalles
+    private Set<ArticuloManufacturadoDetalle> detalles = new HashSet<>(); // Los ingredientes de la receta
 
-    @ManyToMany(mappedBy = "articulosManufacturados")
-    private List<Promocion> promociones;
+
 }

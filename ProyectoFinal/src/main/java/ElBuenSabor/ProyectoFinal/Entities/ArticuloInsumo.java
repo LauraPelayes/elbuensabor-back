@@ -20,4 +20,5 @@ public class ArticuloInsumo extends Articulo {
     @ManyToOne
     @JoinColumn(name = "unidad_medida_id")
     private UnidadMedida unidadMedida;
+
 }

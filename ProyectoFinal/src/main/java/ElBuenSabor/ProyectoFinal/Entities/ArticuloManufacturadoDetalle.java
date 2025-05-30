@@ -6,6 +6,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "articulo_manufacturado_detalle")
@@ -22,6 +23,7 @@ public class ArticuloManufacturadoDetalle extends BaseEntity {
     @JoinColumn(name = "articulo_insumo_id")
     private ArticuloInsumo articuloInsumo;
 
-    // La relación @ManyToOne con ArticuloManufacturado se gestiona desde ArticuloManufacturado
-    // con el @JoinColumn(name = "articulo_manufacturado_id")
+    @ManyToOne
+    @JoinColumn(name = "articulo_manufacturado_id",nullable = false) // Esta columna almacenará el ID del ArticuloManufacturado
+    private ArticuloManufacturado articuloManufacturado;
 }

@@ -27,6 +27,18 @@ public interface ArticuloService extends BaseService<Articulo, Long> {
     List<Articulo> findByDenominacionContainingIgnoreCase(String denominacion) throws Exception; //
     List<Articulo> findByCategoriaId(Long categoriaId) throws Exception; //
 
+    // Métodos para borrado lógico
+    void darBajaArticulo(Long id) throws Exception;
+    void darAltaArticulo(Long id) throws Exception;
+
+    // Modificar findAll para que filtre por borrado lógico
+    List<Articulo> findAllActivos() throws Exception;
+    List<ArticuloInsumo> findAllArticulosInsumoActivos() throws Exception;
+    List<ArticuloManufacturado> findAllArticulosManufacturadosActivos() throws Exception;
+
+    // Ajustar búsquedas si deben filtrar por activos
+    List<Articulo> findByDenominacionContainingIgnoreCaseActivos(String denominacion) throws Exception;
+    List<Articulo> findByCategoriaIdActivos(Long categoriaId) throws Exception;
 
     // Es importante considerar cómo manejar el borrado (delete).
     // El BaseService.delete(ID id) borrará por ID. Si necesitas lógica específica

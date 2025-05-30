@@ -25,7 +25,6 @@ public abstract class Articulo extends BaseEntity {
     @JoinColumn(name = "categoria_id")
     protected Categoria categoria;
 
-    @ManyToOne
-    @JoinColumn(name= "unidad_medida_id")
-    protected UnidadMedida unidadMedida;
+    @Column(columnDefinition = "boolean default false")
+    protected boolean estaDadoDeBaja = false;
 }

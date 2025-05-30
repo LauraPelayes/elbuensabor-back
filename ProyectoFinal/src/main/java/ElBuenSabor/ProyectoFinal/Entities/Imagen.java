@@ -1,9 +1,6 @@
 package ElBuenSabor.ProyectoFinal.Entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -14,6 +11,7 @@ import lombok.*;
 @Setter
 @Builder
 public class Imagen extends BaseEntity {
+    @Column(length = 500)
     private String denominacion; // Por ejemplo, la URL de la imagen
 
 
