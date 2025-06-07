@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -142,5 +143,15 @@ public class DomicilioServiceImpl extends BaseServiceImpl<Domicilio, Long> imple
             dto.setLocalidadId(locEnt.getId());
         }
         return dto;
+    }
+
+    @Override
+    public List<Domicilio> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Domicilio> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

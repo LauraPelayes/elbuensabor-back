@@ -18,4 +18,13 @@ public class CategoriaDTO {
     private CategoriaDTO categoriaPadre; // For response, nullable
     private Set<CategoriaDTO> subCategorias; // For response
     private List<Long> sucursalIds; // For linking to sucursales on create/update
+
+    // Agregar este constructor
+    public CategoriaDTO(Long id, String denominacion, Long categoriaPadreId, List<Long> sucursalIds) {
+        this.id = id;
+        this.denominacion = denominacion;
+        this.categoriaPadreId = categoriaPadreId;
+        this.sucursalIds = sucursalIds;
+    }
+
 }

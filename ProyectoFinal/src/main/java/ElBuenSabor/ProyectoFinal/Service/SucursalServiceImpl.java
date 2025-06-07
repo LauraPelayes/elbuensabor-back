@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -220,5 +217,15 @@ public class SucursalServiceImpl extends BaseServiceImpl<Sucursal, Long> impleme
             }).collect(Collectors.toList()));
         }
         return dto;
+    }
+
+    @Override
+    public List<Sucursal> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Sucursal> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

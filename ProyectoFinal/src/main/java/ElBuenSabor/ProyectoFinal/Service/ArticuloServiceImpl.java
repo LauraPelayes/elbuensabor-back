@@ -79,6 +79,11 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
     }
 
     @Override
+    public Optional<Articulo> findById(Long aLong) throws Exception {
+        return Optional.empty();
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Articulo> findAllActivos() throws Exception {
         try {
@@ -127,7 +132,7 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
         }
     }
 
- 
+
     @Override
     @Transactional(readOnly = true)
     public List<Articulo> findByCategoriaIdActivos(Long categoriaId) throws Exception {

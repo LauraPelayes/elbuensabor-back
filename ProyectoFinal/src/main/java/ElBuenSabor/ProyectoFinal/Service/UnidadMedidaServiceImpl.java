@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class UnidadMedidaServiceImpl extends BaseServiceImpl<UnidadMedida, Long> implements UnidadMedidaService {
 
@@ -65,5 +68,15 @@ public class UnidadMedidaServiceImpl extends BaseServiceImpl<UnidadMedida, Long>
         } catch (Exception e) {
             throw new Exception("Error al buscar unidad de medida por denominación: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public List<UnidadMedida> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<UnidadMedida> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

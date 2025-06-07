@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class PaisServiceImpl extends BaseServiceImpl<Pais, Long> implements PaisService {
 
@@ -66,5 +69,15 @@ public class PaisServiceImpl extends BaseServiceImpl<Pais, Long> implements Pais
         } catch (Exception e) {
             throw new Exception("Error al buscar país por nombre: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public List<Pais> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Pais> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

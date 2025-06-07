@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,5 +132,15 @@ public class ProvinciaServiceImpl extends BaseServiceImpl<Provincia, Long> imple
             dto.setPaisId(provincia.getPais().getId()); // Para consistencia en el DTO
         }
         return dto;
+    }
+
+    @Override
+    public List<Provincia> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Provincia> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

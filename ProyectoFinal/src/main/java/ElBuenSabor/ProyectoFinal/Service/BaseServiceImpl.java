@@ -15,15 +15,7 @@ public abstract class BaseServiceImpl<E extends BaseEntity, ID extends Serializa
         this.baseRepository = baseRepository;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<E> findAll() throws Exception {
-        try {
-            return baseRepository.findAll();
-        } catch (Exception e) {
-            throw new Exception("Error al obtener todos los registros: " + e.getMessage());
-        }
-    }
+
 
     @Override
     public boolean existsById(ID id) throws Exception {
@@ -34,15 +26,7 @@ public abstract class BaseServiceImpl<E extends BaseEntity, ID extends Serializa
         }
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<E> findById(ID id) throws Exception {
-        try {
-            return baseRepository.findById(id);
-        } catch (Exception e) {
-            throw new Exception("Error al obtener el registro por ID: " + e.getMessage());
-        }
-    }
+
 
     @Override
     @Transactional
@@ -87,4 +71,6 @@ public abstract class BaseServiceImpl<E extends BaseEntity, ID extends Serializa
             throw new Exception("Error al eliminar el registro: " + e.getMessage());
         }
     }
+
+
 }

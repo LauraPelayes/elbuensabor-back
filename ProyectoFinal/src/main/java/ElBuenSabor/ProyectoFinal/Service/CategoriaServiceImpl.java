@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -132,5 +129,21 @@ public class CategoriaServiceImpl extends BaseServiceImpl<Categoria, Long> imple
         } catch (Exception e) {
             throw new Exception("Error al actualizar la categoría: " + e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Categoria> findAll() throws Exception {
+        try {
+            // CORRECCIÓN: Llamar directamente a findAll() del repositorio si no hay filtro de baja.
+            return categoriaRepository.findAll();
+        } catch (Exception e) {
+            throw new Exception("Error al obtener todas las categorías: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Optional<Categoria> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

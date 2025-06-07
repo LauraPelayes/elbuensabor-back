@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +54,11 @@ public class FacturaServiceImpl extends BaseServiceImpl<Factura, Long> implement
         return convertToDTO(factura);
     }
 
+    @Override
+    public void generarFacturaPorPedido(Pedido savedPedido) {
+
+    }
+
     private FacturaDTO convertToDTO(Factura factura) {
         if (factura == null) return null;
         FacturaDTO dto = new FacturaDTO();
@@ -73,5 +79,15 @@ public class FacturaServiceImpl extends BaseServiceImpl<Factura, Long> implement
         // if (pedidoAsociado != null) dto.setPedidoId(pedidoAsociado.getId());
         // Por ahora, lo dejaremos así, asumiendo que el contexto del pedido_id se conoce por fuera o no es estrictamente necesario en este DTO.
         return dto;
+    }
+
+    @Override
+    public List<Factura> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Factura> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

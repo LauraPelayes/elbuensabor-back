@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,5 +35,16 @@ public class UsuarioServiceImpl extends BaseServiceImpl<Usuario, Long> implement
         } catch (Exception e) {
             throw new Exception("Error al buscar usuario por username: " + e.getMessage(), e);
         }
+    }
+
+
+    @Override
+    public List<Usuario> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Usuario> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

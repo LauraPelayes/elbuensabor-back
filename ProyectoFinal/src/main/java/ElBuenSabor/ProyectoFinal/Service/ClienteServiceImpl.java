@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern; // Para validación de regex
 
@@ -258,5 +259,15 @@ public class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implement
     private boolean isValidEmail(String email) { //
         if (email == null) return false;
         return EMAIL_PATTERN.matcher(email).matches();
+    }
+
+    @Override
+    public List<Cliente> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Cliente> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

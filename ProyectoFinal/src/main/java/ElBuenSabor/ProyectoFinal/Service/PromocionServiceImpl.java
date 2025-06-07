@@ -12,10 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -235,5 +232,15 @@ public class PromocionServiceImpl extends BaseServiceImpl<Promocion, Long> imple
             // }).collect(Collectors.toSet()));
         }
         return dto;
+    }
+
+    @Override
+    public List<Promocion> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Promocion> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

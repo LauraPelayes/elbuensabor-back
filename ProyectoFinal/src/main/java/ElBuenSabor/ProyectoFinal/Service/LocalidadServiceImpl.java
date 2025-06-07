@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -134,5 +135,15 @@ public class LocalidadServiceImpl extends BaseServiceImpl<Localidad, Long> imple
             dto.setProvinciaId(provinciaDTO.getId());
         }
         return dto;
+    }
+
+    @Override
+    public List<Localidad> findAll() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Localidad> findById(Long aLong) throws Exception {
+        return Optional.empty();
     }
 }

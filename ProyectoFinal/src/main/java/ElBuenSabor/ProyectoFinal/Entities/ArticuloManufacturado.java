@@ -20,7 +20,7 @@ public class ArticuloManufacturado extends Articulo {
     private Integer tiempoEstimadoMinutos;
     private String preparacion; // Receta
 
-    @OneToMany(mappedBy = "articuloManufacturado", cascade = CascadeType.ALL, orphanRemoval = true) // CASCADE.ALL para guardar/actualizar detalles
+    @OneToMany(mappedBy = "articuloManufacturado", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER) // CASCADE.ALL para guardar/actualizar detalles
     private Set<ArticuloManufacturadoDetalle> detalles = new HashSet<>(); // Los ingredientes de la receta
 
 
