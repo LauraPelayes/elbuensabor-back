@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ArticuloManufacturadoRepository extends JpaRepository<ArticuloManufacturado, Long> {
-    List<ArticuloManufacturado> findByEstaDadoDeBajaFalse(); // ¡AÑADIDO!
+    List<ArticuloManufacturado> findByEstaDadoDeBajaFalse();
 }

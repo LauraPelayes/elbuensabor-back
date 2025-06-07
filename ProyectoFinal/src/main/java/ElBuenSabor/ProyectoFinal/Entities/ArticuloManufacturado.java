@@ -18,6 +18,8 @@ public class ArticuloManufacturado extends Articulo {
 
     private String descripcion;
     private Integer tiempoEstimadoMinutos;
+
+    @Column(length = 1000)
     private String preparacion; // Receta
 
     @OneToMany(mappedBy = "articuloManufacturado", cascade = CascadeType.ALL, orphanRemoval = true) // CASCADE.ALL para guardar/actualizar detalles
