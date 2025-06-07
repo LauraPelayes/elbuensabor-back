@@ -1,6 +1,9 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
 import ElBuenSabor.ProyectoFinal.Entities.TipoPromocion;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +18,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PromocionDTO {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String denominacion;
     private LocalDate fechaDesde;

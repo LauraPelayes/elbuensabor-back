@@ -1,6 +1,6 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
-import ElBuenSabor.ProyectoFinal.DTO.CategoriaCreateUpdateDTO;
+import ElBuenSabor.ProyectoFinal.DTO.CategoriaShortDTO;
 import ElBuenSabor.ProyectoFinal.Entities.Categoria;
 import ElBuenSabor.ProyectoFinal.Entities.Sucursal;
 import ElBuenSabor.ProyectoFinal.Repositories.CategoriaRepository;
@@ -47,7 +47,7 @@ public class CategoriaServiceImpl extends BaseServiceImpl<Categoria, Long> imple
 
     @Override
     @Transactional
-    public Categoria createCategoria(CategoriaCreateUpdateDTO dto) throws Exception {
+    public Categoria createCategoria(CategoriaShortDTO dto) throws Exception {
         try {
             Categoria categoria = new Categoria();
             categoria.setDenominacion(dto.getDenominacion());
@@ -79,7 +79,7 @@ public class CategoriaServiceImpl extends BaseServiceImpl<Categoria, Long> imple
 
     @Override
     @Transactional
-    public Categoria updateCategoria(Long id, CategoriaCreateUpdateDTO dto) throws Exception {
+    public Categoria updateCategoria(Long id, CategoriaShortDTO dto) throws Exception {
         try {
             Categoria categoria = categoriaRepository.findById(id)
                     .orElseThrow(() -> new Exception("Categoría no encontrada con ID: " + id));
