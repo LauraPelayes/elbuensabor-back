@@ -1,7 +1,7 @@
 package ElBuenSabor.ProyectoFinal.Controllers;
 
-import ElBuenSabor.ProyectoFinal.DTO.PedidoCreateDTO;
-import ElBuenSabor.ProyectoFinal.DTO.PedidoResponseDTO;
+import ElBuenSabor.ProyectoFinal.DTO.PedidoShortDTO;
+import ElBuenSabor.ProyectoFinal.DTO.PedidoFullDTO;
 import ElBuenSabor.ProyectoFinal.Entities.Estado;
 import ElBuenSabor.ProyectoFinal.Service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,9 @@ public class PedidoController {
 
     // Endpoint para que un cliente cree un nuevo pedido
     @PostMapping("")
-    public ResponseEntity<?> crearPedido(@RequestBody PedidoCreateDTO pedidoCreateDTO) {
+    public ResponseEntity<?> crearPedido(@RequestBody PedidoShortDTO pedidoCreateDTO) {
         try {
-            PedidoResponseDTO nuevoPedido = pedidoService.crearPedido(pedidoCreateDTO);
+            PedidoFullDTO nuevoPedido = pedidoService.crearPedido(pedidoCreateDTO);
             return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -36,7 +36,7 @@ public class PedidoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPedidoPorId(@PathVariable Long id) {
         try {
-            PedidoResponseDTO pedido = pedidoService.findPedidoById(id);
+            PedidoFullDTO pedido = pedidoService.findPedidoById(id);
             return ResponseEntity.ok(pedido);
         } catch (Exception e) {
             // Si la excepción es "Pedido no encontrado", podría devolverse NOT_FOUND
@@ -53,7 +53,7 @@ public class PedidoController {
         // Aquí debería haber seguridad para asegurar que el clienteId corresponde al usuario autenticado
         // o que el usuario autenticado es un administrador.
         try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findByClienteId(clienteId); //
+            List<PedidoFullDTO> pedidos = pedidoService.findByClienteId(clienteId); //
             return ResponseEntity.ok(pedidos);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -65,7 +65,7 @@ public class PedidoController {
     public ResponseEntity<?> obtenerPedidosPorEstado(@PathVariable Estado estado) {
         // Este endpoint probablemente sería para roles de empleado/admin.
         try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findByEstado(estado); //
+            List<PedidoFullDTO> pedidos = pedidoService.findByEstado(estado); //
             return ResponseEntity.ok(pedidos);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -77,7 +77,7 @@ public class PedidoController {
     public ResponseEntity<?> listarTodosLosPedidos() {
         // Este endpoint probablemente sería para roles de empleado/admin.
         try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findAllPedidos();
+            List<PedidoFullDTO> pedidos = pedidoService.findAllPedidos();
             return ResponseEntity.ok(pedidos);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -90,7 +90,7 @@ public class PedidoController {
     public ResponseEntity<?> cambiarEstadoPedido(@PathVariable Long id, @RequestParam Estado nuevoEstado) {
         // Endpoint para empleados/admins.
         try {
-            PedidoResponseDTO pedidoActualizado = pedidoService.cambiarEstadoPedido(id, nuevoEstado);
+            PedidoFullDTO pedidoActualizado = pedidoService.cambiarEstadoPedido(id, nuevoEstado);
             return ResponseEntity.ok(pedidoActualizado);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

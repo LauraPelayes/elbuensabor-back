@@ -12,14 +12,14 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PedidoCreateDTO {
+public class PedidoShortDTO {
+
     //Para crear un pedido
     private Long clienteId;
-    private Long domicilioEntregaId; // Required if tipoEnvio is DELIVERY
+    private Long domicilioEntregaId;
     private TipoEnvio tipoEnvio;
     private FormaPago formaPago;
     private Long sucursalId;
-    private Set<DetallePedidoCreateDTO> detallesPedidos; // Simplified details for creation
-    // total and totalCosto will be calculated server-side
-    // horaEstimadaFinalizacion, estado, fechaPedido will be set server-side initially
+    private Set<DetallePedidoShortDTO> detallesPedidos;
+
 }

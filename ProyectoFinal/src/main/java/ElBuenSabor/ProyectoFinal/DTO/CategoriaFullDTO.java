@@ -11,11 +11,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoriaDTO {
+public class CategoriaFullDTO {
     private Long id;
     private String denominacion;
     private Long categoriaPadreId; // For request, nullable
-    private CategoriaDTO categoriaPadre; // For response, nullable
-    private Set<CategoriaDTO> subCategorias; // For response
+    private CategoriaFullDTO categoriaPadre; // For response, nullable
+    private Set<CategoriaFullDTO> subCategorias; // For response
     private List<Long> sucursalIds; // For linking to sucursales on create/update
 }

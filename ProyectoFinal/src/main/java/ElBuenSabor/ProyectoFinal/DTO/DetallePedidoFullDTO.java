@@ -9,11 +9,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArticuloManufacturadoDetalleDTO {
+public class DetallePedidoFullDTO {
 
     private Long id;
-    private Double cantidad;
-    //private Long articuloInsumoId;
+    private Integer cantidad;
+    private Double subTotal;
+    private ArticuloManufacturadoFullDTO articuloManufacturado;
     private ArticuloInsumoFullDTO articuloInsumo;
+    private PedidoFullDTO pedido;
 
 }

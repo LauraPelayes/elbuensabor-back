@@ -27,7 +27,7 @@ public class PromocionDTO {
     private ImagenDTO imagen;
     private Long imagenId; // For create/update
     private List<Long> articuloManufacturadoIds; // For request
-    private List<ArticuloManufacturadoDTO> articulosManufacturados; // For response
+    private List<ArticuloManufacturadoFullDTO> articulosManufacturados; // For response
     private Set<Long> sucursalIds; // For request: IDs of sucursales where this promo applies
     // For response, you might list sucursales if needed
     // private Set<SucursalSimpleDTO> sucursales;

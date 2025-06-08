@@ -13,4 +13,5 @@ import lombok.*;
 public class Pais extends BaseEntity {
 
     private String nombre;
+
 }

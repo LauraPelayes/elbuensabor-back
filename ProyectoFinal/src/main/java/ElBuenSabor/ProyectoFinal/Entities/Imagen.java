@@ -11,6 +11,7 @@ import lombok.*;
 @Setter
 @Builder
 public class Imagen extends BaseEntity {
+
     @Column(length = 500)
     private String denominacion; // Por ejemplo, la URL de la imagen
 

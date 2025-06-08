@@ -99,7 +99,7 @@ public class SucursalController {
                 return new ResponseEntity<>("Sucursal no encontrada.", HttpStatus.NOT_FOUND);
             }
             List<Categoria> categorias = categoriaService.findBySucursalesId(id);
-            List<CategoriaDTO> dtos = categorias.stream()
+            List<CategoriaFullDTO> dtos = categorias.stream()
                     // Usar el convertToDTO (o simple) de CategoriaController o uno local
                     .map(this::convertToCategoriaDTOSimpleForSucursal)
                     .collect(Collectors.toList());
@@ -219,9 +219,9 @@ public class SucursalController {
         return dto;
     }
 
-    private CategoriaDTO convertToCategoriaDTOSimpleForSucursal(Categoria categoria) {
+    private CategoriaFullDTO convertToCategoriaDTOSimpleForSucursal(Categoria categoria) {
         if (categoria == null) return null;
-        CategoriaDTO dto = new CategoriaDTO();
+        CategoriaFullDTO dto = new CategoriaFullDTO();
         dto.setId(categoria.getId());
         dto.setDenominacion(categoria.getDenominacion());
         // No incluir padre, subcategorías o sucursales aquí para evitar ciclos y mantenerlo simple

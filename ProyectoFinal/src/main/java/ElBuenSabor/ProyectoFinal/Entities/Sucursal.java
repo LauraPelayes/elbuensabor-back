@@ -26,6 +26,7 @@ public class Sucursal extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
+
     @ManyToMany
     @JoinTable(
             name = "sucursal_categoria",

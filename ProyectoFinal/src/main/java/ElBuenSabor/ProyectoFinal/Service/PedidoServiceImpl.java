@@ -48,7 +48,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
 
     @Override
     @Transactional
-    public PedidoResponseDTO crearPedido(PedidoCreateDTO pedidoCreateDTO) throws Exception {
+    public PedidoFullDTO crearPedido(PedidoShortDTO pedidoCreateDTO) throws Exception {
         try {
             Cliente cliente = clienteRepository.findById(pedidoCreateDTO.getClienteId())
                     .orElseThrow(() -> new Exception("Cliente no encontrado con ID: " + pedidoCreateDTO.getClienteId()));
@@ -95,7 +95,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
             int tiempoEstimadoTotal = 0;
 
             Set<DetallePedido> detalles = new HashSet<>();
-            for (DetallePedidoCreateDTO detalleDTO : pedidoCreateDTO.getDetallesPedidos()) {
+            for (DetallePedidoShortDTO detalleDTO : pedidoCreateDTO.getDetallesPedidos()) {
                 if (detalleDTO.getCantidad() <= 0) {
                     throw new Exception("La cantidad en el detalle del pedido debe ser mayor a cero.");
                 }
@@ -189,7 +189,7 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
 
     @Override
     @Transactional
-    public PedidoResponseDTO cambiarEstadoPedido(Long pedidoId, Estado nuevoEstado) throws Exception {
+    public PedidoFullDTO cambiarEstadoPedido(Long pedidoId, Estado nuevoEstado) throws Exception {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new Exception("Pedido no encontrado con ID: " + pedidoId));
 
@@ -243,21 +243,21 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
 
     @Override
     @Transactional(readOnly = true)
-    public List<PedidoResponseDTO> findByClienteId(Long clienteId) throws Exception {
+    public List<PedidoFullDTO> findByClienteId(Long clienteId) throws Exception {
         List<Pedido> pedidos = pedidoRepository.findByClienteId(clienteId);
         return pedidos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PedidoResponseDTO> findByEstado(Estado estado) throws Exception {
+    public List<PedidoFullDTO> findByEstado(Estado estado) throws Exception {
         List<Pedido> pedidos = pedidoRepository.findByEstado(estado);
         return pedidos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PedidoResponseDTO findPedidoById(Long id) throws Exception {
+    public PedidoFullDTO findPedidoById(Long id) throws Exception {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new Exception("Pedido no encontrado con ID: " + id));
         return convertToDto(pedido);
@@ -265,15 +265,15 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
 
     @Override
     @Transactional(readOnly = true)
-    public List<PedidoResponseDTO> findAllPedidos() throws Exception {
+    public List<PedidoFullDTO> findAllPedidos() throws Exception {
         List<Pedido> pedidos = pedidoRepository.findAll();
         return pedidos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
-    private PedidoResponseDTO convertToDto(Pedido pedido) {
+    private PedidoFullDTO convertToDto(Pedido pedido) {
         if (pedido == null) return null;
 
-        PedidoResponseDTO dto = new PedidoResponseDTO();
+        PedidoFullDTO dto = new PedidoFullDTO();
         dto.setId(pedido.getId());
         dto.setHoraEstimadaFinalizacion(pedido.getHoraEstimadaFinalizacion());
         dto.setTotal(pedido.getTotal());
@@ -338,19 +338,19 @@ public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements 
 
         if (pedido.getDetallesPedidos() != null) {
             dto.setDetallesPedidos(pedido.getDetallesPedidos().stream().map(detalle -> {
-                DetallePedidoDTO detalleDTO = new DetallePedidoDTO();
+                DetallePedidoFullDTO detalleDTO = new DetallePedidoFullDTO();
                 detalleDTO.setId(detalle.getId());
                 detalleDTO.setCantidad(detalle.getCantidad());
                 detalleDTO.setSubTotal(detalle.getSubTotal());
                 if (detalle.getArticuloManufacturado() != null) {
-                    ArticuloManufacturadoDTO amDto = new ArticuloManufacturadoDTO();
+                    ArticuloManufacturadoFullDTO amDto = new ArticuloManufacturadoFullDTO();
                     amDto.setId(detalle.getArticuloManufacturado().getId());
                     amDto.setDenominacion(detalle.getArticuloManufacturado().getDenominacion());
                     amDto.setPrecioVenta(detalle.getArticuloManufacturado().getPrecioVenta());
                     detalleDTO.setArticuloManufacturado(amDto);
                 }
                 if (detalle.getArticuloInsumo() != null) {
-                    ArticuloInsumoDTO aiDto = new ArticuloInsumoDTO();
+                    ArticuloInsumoFullDTO aiDto = new ArticuloInsumoFullDTO();
                     aiDto.setId(detalle.getArticuloInsumo().getId());
                     aiDto.setDenominacion(detalle.getArticuloInsumo().getDenominacion());
                     aiDto.setPrecioVenta(detalle.getArticuloInsumo().getPrecioVenta());
