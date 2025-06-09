@@ -10,10 +10,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArticuloManufacturadoDetalleDTO {
-
     private Long id;
     private Double cantidad;
-    //private Long articuloInsumoId;
-    private ArticuloInsumoFullDTO articuloInsumo;
-
+    private Long articuloInsumoId;
+    // For response, you might include more ArticuloInsumo details
+    private ArticuloInsumoDTO articuloInsumo;
 }

@@ -9,10 +9,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DetallePedidoShortDTO {
-
+public class DetallePedidoDTO {
+    private Long id;
     private Integer cantidad;
+    private Double subTotal;
+
+    // For request, you'd send one of these IDs
     private Long articuloManufacturadoId;
     private Long articuloInsumoId;
 
+    // For response, you might embed the DTOs
+    private ArticuloManufacturadoDTO articuloManufacturado;
+    private ArticuloInsumoDTO articuloInsumo;
 }

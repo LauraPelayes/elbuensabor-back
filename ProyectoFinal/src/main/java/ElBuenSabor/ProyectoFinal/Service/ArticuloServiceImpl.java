@@ -1,7 +1,7 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
-import ElBuenSabor.ProyectoFinal.DTO.ArticuloInsumoFullDTO;
-import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoFullDTO;
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloInsumoDTO;
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDTO;
 import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDetalleDTO;
 import ElBuenSabor.ProyectoFinal.Entities.*;
 import ElBuenSabor.ProyectoFinal.Repositories.*;
@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> implements ArticuloService {
@@ -140,7 +141,7 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
     // --- Métodos para ArticuloInsumo (se mantienen) ---
     @Override
     @Transactional
-    public ArticuloInsumo createArticuloInsumo(ArticuloInsumoFullDTO dto) throws Exception {
+    public ArticuloInsumo createArticuloInsumo(ArticuloInsumoDTO dto) throws Exception {
         try {
             ArticuloInsumo insumo = new ArticuloInsumo();
             insumo.setDenominacion(dto.getDenominacion());
@@ -181,7 +182,7 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
 
     @Override
     @Transactional
-    public ArticuloInsumo updateArticuloInsumo(Long id, ArticuloInsumoFullDTO dto) throws Exception {
+    public ArticuloInsumo updateArticuloInsumo(Long id, ArticuloInsumoDTO dto) throws Exception {
         try {
             ArticuloInsumo insumo = articuloInsumoRepository.findById(id)
                     .orElseThrow(() -> new Exception("Artículo Insumo no encontrado con ID: " + id));
@@ -245,7 +246,7 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
     // --- Métodos para ArticuloManufacturado ---
     @Override
     @Transactional
-    public ArticuloManufacturado createArticuloManufacturado(ArticuloManufacturadoFullDTO dto) throws Exception {
+    public ArticuloManufacturado createArticuloManufacturado(ArticuloManufacturadoDTO dto) throws Exception {
         try {
             if (dto.getDetalles() == null || dto.getDetalles().isEmpty()) {
                 throw new Exception("Un artículo manufacturado debe tener al menos un ingrediente.");
@@ -304,7 +305,7 @@ public class ArticuloServiceImpl extends BaseServiceImpl<Articulo, Long> impleme
 
     @Override
     @Transactional
-    public ArticuloManufacturado updateArticuloManufacturado(Long id, ArticuloManufacturadoFullDTO dto) throws Exception {
+    public ArticuloManufacturado updateArticuloManufacturado(Long id, ArticuloManufacturadoDTO dto) throws Exception {
         try {
             ArticuloManufacturado manufacturado = articuloManufacturadoRepository.findById(id)
                     .orElseThrow(() -> new Exception("Artículo Manufacturado no encontrado con ID: " + id));

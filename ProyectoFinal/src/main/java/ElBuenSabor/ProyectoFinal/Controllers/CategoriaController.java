@@ -1,7 +1,7 @@
 package ElBuenSabor.ProyectoFinal.Controllers;
 
 import ElBuenSabor.ProyectoFinal.DTO.CategoriaCreateUpdateDTO;
-import ElBuenSabor.ProyectoFinal.DTO.CategoriaFullDTO;
+import ElBuenSabor.ProyectoFinal.DTO.CategoriaDTO;
 import ElBuenSabor.ProyectoFinal.Entities.Categoria;
 import ElBuenSabor.ProyectoFinal.Entities.Sucursal;
 import ElBuenSabor.ProyectoFinal.Service.CategoriaService;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Set; // Para el set de sucursales en el DTO
 
 @RestController
 @RequestMapping("/api/v1/categorias")
@@ -73,7 +74,7 @@ public class CategoriaController {
             } else {
                 categorias = categoriaService.findAll(); //
             }
-            List<CategoriaFullDTO> dtos = categorias.stream()
+            List<CategoriaDTO> dtos = categorias.stream()
                     .map(this::convertToCategoriaDTO) // Usar el helper que incluye subcategorías
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
@@ -87,7 +88,7 @@ public class CategoriaController {
     public ResponseEntity<?> listarCategoriasRaiz() {
         try {
             List<Categoria> categoriasRaiz = categoriaService.findByCategoriaPadreIsNull(); //
-            List<CategoriaFullDTO> dtos = categoriasRaiz.stream()
+            List<CategoriaDTO> dtos = categoriasRaiz.stream()
                     .map(this::convertToCategoriaDTO)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
@@ -105,7 +106,7 @@ public class CategoriaController {
                 return new ResponseEntity<>("Categoría padre no encontrada.", HttpStatus.NOT_FOUND);
             }
             Categoria categoriaPadre = categoriaPadreOpt.get();
-            List<CategoriaFullDTO> dtos = categoriaPadre.getSubCategorias().stream() //
+            List<CategoriaDTO> dtos = categoriaPadre.getSubCategorias().stream() //
                     .map(this::convertToCategoriaDTOSimple) // Usar DTO simple para subcategorías
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
@@ -144,9 +145,9 @@ public class CategoriaController {
     }
 
     // --- Helper para convertir Entidad a DTO ---
-    private CategoriaFullDTO convertToCategoriaDTO(Categoria categoria) {
+    private CategoriaDTO convertToCategoriaDTO(Categoria categoria) {
         if (categoria == null) return null;
-        CategoriaFullDTO dto = new CategoriaFullDTO();
+        CategoriaDTO dto = new CategoriaDTO();
         dto.setId(categoria.getId());
         dto.setDenominacion(categoria.getDenominacion());
 
@@ -174,9 +175,9 @@ public class CategoriaController {
     }
 
     // DTO más simple para evitar recursividad infinita o DTOs muy pesados
-    private CategoriaFullDTO convertToCategoriaDTOSimple(Categoria categoria) {
+    private CategoriaDTO convertToCategoriaDTOSimple(Categoria categoria) {
         if (categoria == null) return null;
-        CategoriaFullDTO dto = new CategoriaFullDTO();
+        CategoriaDTO dto = new CategoriaDTO();
         dto.setId(categoria.getId());
         dto.setDenominacion(categoria.getDenominacion());
         if (categoria.getCategoriaPadre() != null) {

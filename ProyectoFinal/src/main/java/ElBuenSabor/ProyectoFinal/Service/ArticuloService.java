@@ -3,24 +3,24 @@ package ElBuenSabor.ProyectoFinal.Service;
 import ElBuenSabor.ProyectoFinal.Entities.Articulo;
 import ElBuenSabor.ProyectoFinal.Entities.ArticuloInsumo;
 import ElBuenSabor.ProyectoFinal.Entities.ArticuloManufacturado;
-import ElBuenSabor.ProyectoFinal.DTO.ArticuloInsumoFullDTO; // Asumiendo que usarás DTOs para la creación/actualización
-import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoFullDTO; // Asumiendo que usarás DTOs
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloInsumoDTO; // Asumiendo que usarás DTOs para la creación/actualización
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDTO; // Asumiendo que usarás DTOs
 
 import java.util.List;
 
 public interface ArticuloService extends BaseService<Articulo, Long> {
 
     // Métodos específicos para ArticuloInsumo
-    ArticuloInsumo createArticuloInsumo(ArticuloInsumoFullDTO dto) throws Exception;
-    ArticuloInsumo updateArticuloInsumo(Long id, ArticuloInsumoFullDTO dto) throws Exception;
+    ArticuloInsumo createArticuloInsumo(ArticuloInsumoDTO dto) throws Exception;
+    ArticuloInsumo updateArticuloInsumo(Long id, ArticuloInsumoDTO dto) throws Exception;
     List<ArticuloInsumo> findAllArticulosInsumo() throws Exception;
     List<ArticuloInsumo> findArticulosInsumoByStockActualLessThanEqual(Double stockMinimo) throws Exception; //
     // Podrías añadir un método para actualizar solo el stock si es una operación común
 
 
     // Métodos específicos para ArticuloManufacturado
-    ArticuloManufacturado createArticuloManufacturado(ArticuloManufacturadoFullDTO dto) throws Exception;
-    ArticuloManufacturado updateArticuloManufacturado(Long id, ArticuloManufacturadoFullDTO dto) throws Exception;
+    ArticuloManufacturado createArticuloManufacturado(ArticuloManufacturadoDTO dto) throws Exception;
+    ArticuloManufacturado updateArticuloManufacturado(Long id, ArticuloManufacturadoDTO dto) throws Exception;
     List<ArticuloManufacturado> findAllArticulosManufacturados() throws Exception;
 
     // Métodos generales de búsqueda que aplican a ambos (o se implementan para buscar en ambos)

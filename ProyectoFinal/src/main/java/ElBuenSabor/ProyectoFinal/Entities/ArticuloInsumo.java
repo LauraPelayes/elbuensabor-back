@@ -3,8 +3,6 @@ package ElBuenSabor.ProyectoFinal.Entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.awt.*;
-
 @Entity
 @Table(name = "articulo_insumo")
 @NoArgsConstructor
@@ -22,9 +20,5 @@ public class ArticuloInsumo extends Articulo {
     @ManyToOne
     @JoinColumn(name = "unidad_medida_id")
     private UnidadMedida unidadMedida;
-
-//    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JoinColumn(name = "imagen_id", referencedColumnName = "id")
-//    private Imagen imagen;
 
 }

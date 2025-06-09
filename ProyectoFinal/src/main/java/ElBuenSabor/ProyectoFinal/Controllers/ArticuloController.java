@@ -1,7 +1,7 @@
 package ElBuenSabor.ProyectoFinal.Controllers;
 
-import ElBuenSabor.ProyectoFinal.DTO.ArticuloInsumoFullDTO;
-import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoFullDTO;
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloInsumoDTO;
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDTO;
 // Necesitarás DTOs de respuesta si quieres devolver algo diferente a la entidad o al DTO de entrada.
 // Por simplicidad, aquí a menudo devolveremos el mismo DTO de entrada/entidad o un DTO genérico.
 // import ElBuenSabor.ProyectoFinal.DTO.ArticuloResponseDTO; // DTO genérico para respuestas de listados
@@ -11,7 +11,7 @@ import ElBuenSabor.ProyectoFinal.Entities.ArticuloManufacturado;
 import ElBuenSabor.ProyectoFinal.Service.ArticuloService;
 
 // Importaciones para el mapeo a DTOs de respuesta
-import ElBuenSabor.ProyectoFinal.DTO.CategoriaFullDTO;
+import ElBuenSabor.ProyectoFinal.DTO.CategoriaDTO;
 import ElBuenSabor.ProyectoFinal.DTO.ImagenDTO;
 import ElBuenSabor.ProyectoFinal.DTO.UnidadMedidaDTO;
 import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDetalleDTO;
@@ -37,7 +37,7 @@ public class ArticuloController {
     // --- Endpoints para ArticuloInsumo ---
 
     @PostMapping("/insumos")
-    public ResponseEntity<?> crearArticuloInsumo(@RequestBody ArticuloInsumoFullDTO insumoDTO) {
+    public ResponseEntity<?> crearArticuloInsumo(@RequestBody ArticuloInsumoDTO insumoDTO) {
         try {
             ArticuloInsumo nuevoInsumo = articuloService.createArticuloInsumo(insumoDTO);
             return new ResponseEntity<>(convertToArticuloInsumoDTO(nuevoInsumo), HttpStatus.CREATED);
@@ -63,7 +63,7 @@ public class ArticuloController {
     }
 
     @PutMapping("/insumos/{id}")
-    public ResponseEntity<?> actualizarArticuloInsumo(@PathVariable Long id, @RequestBody ArticuloInsumoFullDTO insumoDTO) {
+    public ResponseEntity<?> actualizarArticuloInsumo(@PathVariable Long id, @RequestBody ArticuloInsumoDTO insumoDTO) {
         try {
             ArticuloInsumo insumoActualizado = articuloService.updateArticuloInsumo(id, insumoDTO);
             return ResponseEntity.ok(convertToArticuloInsumoDTO(insumoActualizado));
@@ -76,7 +76,7 @@ public class ArticuloController {
     public ResponseEntity<?> listarArticulosInsumo() {
         try {
             List<ArticuloInsumo> insumos = articuloService.findAllArticulosInsumo();
-            List<ArticuloInsumoFullDTO> dtos = insumos.stream()
+            List<ArticuloInsumoDTO> dtos = insumos.stream()
                     .map(this::convertToArticuloInsumoDTO)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
@@ -93,7 +93,7 @@ public class ArticuloController {
             // Si queremos usar un parámetro, el servicio debería tener un método que lo acepte.
             // Por ahora, usaré el método existente que compara con el stockMinimo propio del insumo.
             List<ArticuloInsumo> insumos = articuloService.findArticulosInsumoByStockActualLessThanEqual(stockMinimoReferencia); //
-            List<ArticuloInsumoFullDTO> dtos = insumos.stream()
+            List<ArticuloInsumoDTO> dtos = insumos.stream()
                     .map(this::convertToArticuloInsumoDTO)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
@@ -106,7 +106,7 @@ public class ArticuloController {
     // --- Endpoints para ArticuloManufacturado ---
 
     @PostMapping("/manufacturados")
-    public ResponseEntity<?> crearArticuloManufacturado(@RequestBody ArticuloManufacturadoFullDTO manufacturadoDTO) {
+    public ResponseEntity<?> crearArticuloManufacturado(@RequestBody ArticuloManufacturadoDTO manufacturadoDTO) {
         try {
             ArticuloManufacturado nuevoManufacturado = articuloService.createArticuloManufacturado(manufacturadoDTO);
             return new ResponseEntity<>(convertToArticuloManufacturadoDTO(nuevoManufacturado), HttpStatus.CREATED);
@@ -130,7 +130,7 @@ public class ArticuloController {
     }
 
     @PutMapping("/manufacturados/{id}")
-    public ResponseEntity<?> actualizarArticuloManufacturado(@PathVariable Long id, @RequestBody ArticuloManufacturadoFullDTO manufacturadoDTO) {
+    public ResponseEntity<?> actualizarArticuloManufacturado(@PathVariable Long id, @RequestBody ArticuloManufacturadoDTO manufacturadoDTO) {
         try {
             ArticuloManufacturado manufacturadoActualizado = articuloService.updateArticuloManufacturado(id, manufacturadoDTO);
             return ResponseEntity.ok(convertToArticuloManufacturadoDTO(manufacturadoActualizado));
@@ -143,7 +143,7 @@ public class ArticuloController {
     public ResponseEntity<?> listarArticulosManufacturado() {
         try {
             List<ArticuloManufacturado> manufacturados = articuloService.findAllArticulosManufacturados();
-            List<ArticuloManufacturadoFullDTO> dtos = manufacturados.stream()
+            List<ArticuloManufacturadoDTO> dtos = manufacturados.stream()
                     .map(this::convertToArticuloManufacturadoDTO)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
@@ -238,9 +238,9 @@ public class ArticuloController {
 
     // --- Métodos Helper para convertir a DTOs de Respuesta ---
 
-    private ArticuloInsumoFullDTO convertToArticuloInsumoDTO(ArticuloInsumo insumo) {
+    private ArticuloInsumoDTO convertToArticuloInsumoDTO(ArticuloInsumo insumo) {
         if (insumo == null) return null;
-        ArticuloInsumoFullDTO dto = new ArticuloInsumoFullDTO();
+        ArticuloInsumoDTO dto = new ArticuloInsumoDTO();
         dto.setId(insumo.getId());
         dto.setDenominacion(insumo.getDenominacion());
         dto.setPrecioVenta(insumo.getPrecioVenta());
@@ -258,7 +258,7 @@ public class ArticuloController {
         }
         if (insumo.getCategoria() != null) {
             dto.setCategoriaId(insumo.getCategoria().getId());
-            CategoriaFullDTO catDto = new CategoriaFullDTO();
+            CategoriaDTO catDto = new CategoriaDTO();
             catDto.setId(insumo.getCategoria().getId());
             catDto.setDenominacion(insumo.getCategoria().getDenominacion());
             // No cargar sub/padre categorías aquí para evitar complejidad
@@ -274,9 +274,9 @@ public class ArticuloController {
         return dto;
     }
 
-    private ArticuloManufacturadoFullDTO convertToArticuloManufacturadoDTO(ArticuloManufacturado manufacturado) {
+    private ArticuloManufacturadoDTO convertToArticuloManufacturadoDTO(ArticuloManufacturado manufacturado) {
         if (manufacturado == null) return null;
-        ArticuloManufacturadoFullDTO dto = new ArticuloManufacturadoFullDTO();
+        ArticuloManufacturadoDTO dto = new ArticuloManufacturadoDTO();
         dto.setId(manufacturado.getId());
         dto.setDenominacion(manufacturado.getDenominacion());
         dto.setPrecioVenta(manufacturado.getPrecioVenta());
@@ -287,7 +287,7 @@ public class ArticuloController {
 
         if (manufacturado.getCategoria() != null) {
             dto.setCategoriaId(manufacturado.getCategoria().getId());
-            CategoriaFullDTO catDto = new CategoriaFullDTO();
+            CategoriaDTO catDto = new CategoriaDTO();
             catDto.setId(manufacturado.getCategoria().getId());
             catDto.setDenominacion(manufacturado.getCategoria().getDenominacion());
             dto.setCategoria(catDto);
@@ -308,7 +308,7 @@ public class ArticuloController {
                 if (detalle.getArticuloInsumo() != null) {
                     detalleDTO.setArticuloInsumoId(detalle.getArticuloInsumo().getId());
                     // Podrías anidar un ArticuloInsumoSimpleDTO aquí si es necesario
-                    ArticuloInsumoFullDTO insumoDetalleDto = new ArticuloInsumoFullDTO();
+                    ArticuloInsumoDTO insumoDetalleDto = new ArticuloInsumoDTO();
                     insumoDetalleDto.setId(detalle.getArticuloInsumo().getId());
                     insumoDetalleDto.setDenominacion(detalle.getArticuloInsumo().getDenominacion());
                     detalleDTO.setArticuloInsumo(insumoDetalleDto);

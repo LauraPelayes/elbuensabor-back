@@ -23,5 +23,5 @@ public class SucursalDTO {
     // For response, you might show basic empresa info
     // private EmpresaSimpleDTO empresa;
     private List<Long> categoriaIds; // For request: IDs of categories for this sucursal
-    private List<CategoriaFullDTO> categorias; // For response
+    private List<CategoriaDTO> categorias; // For response
 }

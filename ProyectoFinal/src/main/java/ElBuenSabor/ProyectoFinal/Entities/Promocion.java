@@ -41,7 +41,6 @@ public class Promocion extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "articulo_manufacturado_id")
     )
     private List<ArticuloManufacturado> articulosManufacturados;
-
     // También las promociones pueden estar relacionadas con sucursales
     @ManyToMany(mappedBy = "promociones") // Mapeado por el campo 'promociones' en la entidad Sucursal
     private Set<Sucursal> sucursales = new HashSet<>();

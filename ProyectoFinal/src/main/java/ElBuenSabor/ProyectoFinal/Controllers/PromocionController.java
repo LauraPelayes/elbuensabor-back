@@ -17,7 +17,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 // Importaciones para el mapeo a DTOs de respuesta (si fueran diferentes o más complejos)
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDTO;
 import ElBuenSabor.ProyectoFinal.DTO.ImagenDTO;
+import ElBuenSabor.ProyectoFinal.DTO.SucursalDTO;
 
 
 @RestController

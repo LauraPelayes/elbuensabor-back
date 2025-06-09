@@ -10,8 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnidadMedidaDTO {
-
     private Long id;
     private String denominacion;
-
 }

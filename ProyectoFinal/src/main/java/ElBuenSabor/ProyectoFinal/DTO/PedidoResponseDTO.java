@@ -15,7 +15,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PedidoFullDTO {
+public class PedidoResponseDTO {
     //Para ver un pedido
     private Long id;
     private LocalTime horaEstimadaFinalizacion;
@@ -25,9 +25,9 @@ public class PedidoFullDTO {
     private TipoEnvio tipoEnvio;
     private FormaPago formaPago;
     private LocalDate fechaPedido;
-    private ClienteResponseDTO cliente;
+    private ClienteResponseDTO cliente; // Or a simpler ClienteSimpleDTO
     private DomicilioDTO domicilioEntrega;
-    private FacturaDTO factura;
-    private SucursalDTO sucursal;
-    private Set<DetallePedidoFullDTO> detallesPedidos;
+    private FacturaDTO factura; // Nullable if not yet facturado
+    private SucursalDTO sucursal; // Or SucursalSimpleDTO
+    private Set<DetallePedidoDTO> detallesPedidos;
 }

@@ -1,7 +1,9 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
+import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDTO;
 import ElBuenSabor.ProyectoFinal.DTO.ImagenDTO;
 import ElBuenSabor.ProyectoFinal.DTO.PromocionDTO;
+import ElBuenSabor.ProyectoFinal.DTO.SucursalDTO;
 import ElBuenSabor.ProyectoFinal.Entities.*;
 import ElBuenSabor.ProyectoFinal.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;

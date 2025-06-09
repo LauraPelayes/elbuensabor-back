@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -211,7 +212,7 @@ public class SucursalServiceImpl extends BaseServiceImpl<Sucursal, Long> impleme
         }
         if (sucursal.getCategorias() != null) {
             dto.setCategorias(sucursal.getCategorias().stream().map(cat -> {
-                CategoriaFullDTO catDto = new CategoriaFullDTO();
+                CategoriaDTO catDto = new CategoriaDTO();
                 catDto.setId(cat.getId());
                 catDto.setDenominacion(cat.getDenominacion());
                 // No incluir subcategorías o padre aquí para evitar ciclos/respuestas enormes
