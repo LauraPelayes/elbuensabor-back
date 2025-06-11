@@ -13,9 +13,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArticuloManufacturadoDetalleDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
+    private boolean estaDadoDeBaja;
     private Double cantidad;
     private Long articuloInsumoId;
     // For response, you might include more ArticuloInsumo details

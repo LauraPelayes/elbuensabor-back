@@ -2,6 +2,7 @@ package ElBuenSabor.ProyectoFinal.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 public class Domicilio extends BaseEntity {
 
     private String calle;
@@ -25,6 +26,12 @@ public class Domicilio extends BaseEntity {
     @JoinColumn(name = "localidad_id")
     private Localidad localidad;
 
-    @OneToMany(mappedBy = "domicilioEntrega", cascade = CascadeType.ALL, orphanRemoval = true) // <--- ¡Aquí está el error!
+    @Builder.Default
+    @OneToMany(mappedBy = "domicilio", cascade = CascadeType.ALL, orphanRemoval = true) // <--- ¡Aquí está el error! le cambie domicilioEntrega a domicilio
     private Set<Pedido> pedidos = new HashSet<>();
+
+    @Builder.Default // <-- AÑADE BUILDER.DEFAULT
+    @OneToMany(mappedBy = "domicilio", cascade = CascadeType.ALL)
+    private Set<Cliente> clientes = new HashSet<>();
+
 }

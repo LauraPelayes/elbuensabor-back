@@ -31,6 +31,8 @@ public class ClienteRegistroDTO {
     @Size(max = 100, message = "El email no debe exceder los 100 caracteres")
     private String email;
 
+    private DomicilioCreateUpdateDTO domicilio;
+
     @NotBlank(message = "La contraseña es obligatoria")
     // La validación de la fortaleza de la contraseña ya la haces en el servicio,
     // pero podrías añadir un @Pattern aquí también si quieres una validación a nivel de DTO.

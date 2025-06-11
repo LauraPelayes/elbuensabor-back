@@ -15,9 +15,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FacturaDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
+    private boolean estaDadoDeBaja;
     private LocalDate fechaFacturacion;
     private Integer mpPaymentId;
     private Integer mpMerchantOrderId;
@@ -27,3 +27,4 @@ public class FacturaDTO {
     private Double totalVenta;
     private Long pedidoId; // For linking, if you fetch factura separately
 }
+

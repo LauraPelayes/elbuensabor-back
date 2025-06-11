@@ -13,11 +13,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DetallePedidoDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
     private Integer cantidad;
     private Double subTotal;
+    private boolean estaDadoDeBaja;
 
     // For request, you'd send one of these IDs
     private Long articuloManufacturadoId;

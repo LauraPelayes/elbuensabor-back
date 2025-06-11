@@ -33,6 +33,8 @@ public class DomicilioCreateUpdateDTO {
     // O, si localidadId está presente, podría tener precedencia.
     private Long localidadId;
 
+    private boolean estaDadoDeBaja;
+
     // Campos añadidos para permitir la búsqueda o creación por nombre,
     // consistentes con la lógica de ClienteServiceImpl y la actual de SucursalServiceImpl.
     @NotBlank(message = "El nombre de la localidad es obligatorio para el domicilio")

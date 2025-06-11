@@ -19,4 +19,5 @@ public class SucursalCreateUpdateDTO {
     private DomicilioCreateUpdateDTO domicilio; // Create/Update Domicilio along with Sucursal
     private Long empresaId;
     private List<Long> categoriaIds;
+    private boolean estaDadoDeBaja;
 }

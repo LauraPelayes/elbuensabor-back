@@ -15,18 +15,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClienteResponseDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // from BaseEntity, then Usuario
+
+    private Long id;
     private String nombre;
     private String apellido;
     private String telefono;
     private String email;
     private LocalDate fechaNacimiento;
-    private String username; // from Usuario
-    private String auth0Id;  // from Usuario
+    private String username;
+    private String auth0Id;
     private ImagenDTO imagen;
     private List<DomicilioDTO> domicilios;
     private boolean estaDadoDeBaja;
-    // Potentially roles or other user-specific info if not client-specific
+
 }

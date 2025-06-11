@@ -15,9 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoriaDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
+    private boolean estaDadoDeBaja;
     private String denominacion;
     private Long categoriaPadreId; // For request, nullable
     private CategoriaDTO categoriaPadre; // For response, nullable

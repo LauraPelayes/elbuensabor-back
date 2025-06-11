@@ -15,11 +15,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaisDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
 
     @NotBlank(message = "El nombre del país es obligatorio")
     @Size(min = 2, max = 100, message = "El nombre del país debe tener entre 2 y 100 caracteres")
     private String nombre;
+    private boolean estaDadoDeBaja;
 }

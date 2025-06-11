@@ -24,6 +24,8 @@ public class ClienteActualizacionDTO {
     private String nombreLocalidad;
     private String nombreProvincia;
     private String nombrePais;
+    private DomicilioCreateUpdateDTO domicilio;
+
 
     // Para cambio de contraseña (opcionales)
     private String currentPassword;

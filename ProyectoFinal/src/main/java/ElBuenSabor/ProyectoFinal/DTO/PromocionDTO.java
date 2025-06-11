@@ -18,9 +18,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PromocionDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
+    private boolean estaDadoDeBaja;
     private String denominacion;
     private LocalDate fechaDesde;
     private LocalDate fechaHasta;

@@ -14,9 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ArticuloInsumoDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private boolean estaDadoDeBaja;
     private String denominacion;
     private Double precioVenta;
     private Double precioCompra;
@@ -29,4 +28,5 @@ public class ArticuloInsumoDTO {
     private CategoriaDTO categoria; // For response
     private ImagenDTO imagen; // Could be just an ID for request, or a nested DTO
     private Long imagenId; // For create/update if imagen is separate
+
 }

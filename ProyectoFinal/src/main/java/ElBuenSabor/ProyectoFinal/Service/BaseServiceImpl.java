@@ -15,7 +15,14 @@ public abstract class BaseServiceImpl<E extends BaseEntity, ID extends Serializa
         this.baseRepository = baseRepository;
     }
 
-
+    @Override
+    public Optional<E> findById(ID id) throws Exception {
+        try {
+            return baseRepository.findById(id);
+        } catch (Exception e) {
+            throw new Exception("Error al buscar el registro con ID: " + id, e);
+        }
+    }
 
     @Override
     public boolean existsById(ID id) throws Exception {
@@ -26,7 +33,10 @@ public abstract class BaseServiceImpl<E extends BaseEntity, ID extends Serializa
         }
     }
 
-
+    @Override
+    public List<E> findAll() throws Exception {
+        return baseRepository.findAll();
+    }
 
     @Override
     @Transactional

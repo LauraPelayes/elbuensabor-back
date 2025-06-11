@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "unidad_medida")
@@ -11,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 public class UnidadMedida extends BaseEntity {
     @Column(unique = true)
     private String denominacion; // Ej: "kg", "gr", "unidad", "litro"

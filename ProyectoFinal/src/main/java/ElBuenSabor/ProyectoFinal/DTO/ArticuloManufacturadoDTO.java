@@ -14,9 +14,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArticuloManufacturadoDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
+    private boolean estaDadoDeBaja;
     private String denominacion;
     private Double precioVenta;
     private String descripcion;
@@ -24,8 +24,6 @@ public class ArticuloManufacturadoDTO {
     private String preparacion;
     private Long categoriaId;
     private CategoriaDTO categoria; // For response
-    private Long unidadMedidaId; // Though often "unidad" for manufacturados
-    private UnidadMedidaDTO unidadMedida; // For response
     private ImagenDTO imagen;
     private Long imagenId; // For create/update
     private Set<ArticuloManufacturadoDetalleDTO> detalles;

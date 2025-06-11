@@ -13,10 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProvinciaDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
     private String nombre;
     private Long paisId; // For request
     private PaisDTO pais; // For response
+    private boolean estaDadoDeBaja;
 }

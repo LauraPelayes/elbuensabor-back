@@ -13,8 +13,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImagenDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
     private String denominacion; // URL or identifier
+    private boolean estaDadoDeBaja;
+
 }

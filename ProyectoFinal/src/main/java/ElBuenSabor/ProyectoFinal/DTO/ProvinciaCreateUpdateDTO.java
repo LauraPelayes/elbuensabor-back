@@ -13,4 +13,6 @@ public class ProvinciaCreateUpdateDTO {
     //Request DTO
     private String nombre;
     private Long paisId;
+    private boolean estaDadoDeBaja;
+
 }

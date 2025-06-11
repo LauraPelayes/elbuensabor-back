@@ -19,9 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PedidoResponseDTO {
-    //Para ver un pedido
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
     private LocalTime horaEstimadaFinalizacion;
     private Double total;

@@ -14,12 +14,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmpresaDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
     private String nombre;
     private String razonSocial;
     private Integer cuil;
+    private boolean estaDadoDeBaja;
     // For response, you might include a list of SucursalSimpleDTO
     private List<SucursalDTO> sucursales; // Or SucursalSimpleDTO to avoid cycles if SucursalDTO contains EmpresaDTO
 }
