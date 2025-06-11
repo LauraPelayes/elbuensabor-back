@@ -27,7 +27,7 @@ public class Promocion extends BaseEntity {
     private Double precioPromocional;
 
     @Enumerated(EnumType.STRING)
-    private TipoPromocion tipoPromocion; // happyHour, promocionGeneral [cite: 249]
+    private TipoPromocion tipoPromocion;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "imagen_id") // Una promoción puede tener una imagen
