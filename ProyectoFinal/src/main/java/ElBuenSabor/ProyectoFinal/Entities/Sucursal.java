@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.time.LocalTime;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class Sucursal extends BaseEntity {
 
     private String nombre;
@@ -23,11 +24,12 @@ public class Sucursal extends BaseEntity {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "domicilio_id", referencedColumnName = "id")
-    private Domicilio domicilio; // Cada sucursal tiene un domicilio
+    private Domicilio domicilio;
 
     @ManyToOne
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
+
     @ManyToMany
     @JoinTable(
             name = "sucursal_categoria",
@@ -37,13 +39,13 @@ public class Sucursal extends BaseEntity {
     private List<Categoria> categorias;
 
     @OneToMany(mappedBy = "sucursal")
-    private List<Pedido>pedidos;
+    private List<Pedido> pedidos;
 
     @ManyToMany
     @JoinTable(
-            name = "sucursal_promocion", // Nombre de la tabla de unión
+            name = "sucursal_promocion",
             joinColumns = @JoinColumn(name = "sucursal_id"),
             inverseJoinColumns = @JoinColumn(name = "promocion_id")
     )
-    private Set<Promocion> promociones = new HashSet<>();
+    private List<Promocion> promociones = new ArrayList<>();
 }

@@ -1,8 +1,5 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +11,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteResponseDTO {
+public class ClienteDTO {
 
     private Long id;
     private String nombre;
@@ -22,10 +19,10 @@ public class ClienteResponseDTO {
     private String telefono;
     private String email;
     private LocalDate fechaNacimiento;
-    private String username;
-    private String auth0Id;
-    private ImagenDTO imagen;
-    private List<DomicilioDTO> domicilios;
     private boolean estaDadoDeBaja;
+
+    private ImagenDTO imagen;
+    private UsuarioDTO usuario;
+    private List<DomicilioDTO> domicilios;
 
 }

@@ -15,31 +15,32 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
-public class Cliente extends Usuario {
+@Builder
+public class Cliente extends BaseEntity {
 
     private String nombre;
     private String apellido;
     private String telefono;
-    @Column(unique = true) // El email del cliente debe ser único [cite: 19]
-    private String email;
-    private String password; // La contraseña encriptada [cite: 20]
-    private LocalDate fechaNacimiento; // Según tu diagrama [cite: 251]
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cliente_id")
-    private List<Domicilio> domicilios;
+    @Column(unique = true)
+    private String email;
+
+    private String password;
+    private LocalDate fechaNacimiento;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Domicilio> domicilios = new ArrayList<>();
+
     @OneToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", unique = true)
     private Usuario usuario;
+
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Pedido> pedidos = new ArrayList<>();
-    // Puedes agregar un campo para manejar el estado de baja del cliente [cite: 33]
-    private boolean estaDadoDeBaja = false; // Por defecto, no está dado de baja
 
     @OneToOne
-    @JoinColumn(name ="imagen_id")
+    @JoinColumn(name = "imagen_id")
     private Imagen imagen;
 
+    private boolean estaDadoDeBaja = false;
 }
-

@@ -4,7 +4,9 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "articulo")
@@ -24,9 +26,11 @@ public abstract class Articulo extends BaseEntity {
     protected Imagen imagen;
 
     @ManyToOne
+    @JoinColumn(name = "unidad_medida_id")
+    private UnidadMedida unidadMedida;
+
+    @ManyToOne
     @JoinColumn(name = "categoria_id")
     protected Categoria categoria;
 
-    @Column(columnDefinition = "boolean default false")
-    protected boolean estaDadoDeBaja = false;
 }

@@ -1,116 +1,124 @@
 package ElBuenSabor.ProyectoFinal.Controllers;
 
+import ElBuenSabor.ProyectoFinal.Repositories.ArticuloInsumoRepository;
+import ElBuenSabor.ProyectoFinal.Repositories.ArticuloManufacturadoRepository;
+import ElBuenSabor.ProyectoFinal.DTO.FacturaCreateDTO;
 import ElBuenSabor.ProyectoFinal.DTO.PedidoCreateDTO;
-import ElBuenSabor.ProyectoFinal.DTO.PedidoResponseDTO;
-import ElBuenSabor.ProyectoFinal.Entities.Estado;
+import ElBuenSabor.ProyectoFinal.DTO.PedidoDTO;
+import ElBuenSabor.ProyectoFinal.Entities.*;
+import ElBuenSabor.ProyectoFinal.Entities.FormaPago;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Mappers.PedidoMapper;
+import ElBuenSabor.ProyectoFinal.Repositories.*;
 import ElBuenSabor.ProyectoFinal.Service.PedidoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/pedidos")
-@CrossOrigin(origins = "*") // Ajustar según necesidades
+@RequestMapping("/api/pedidos")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173") // Ajustalo según tu frontend
 public class PedidoController {
 
-    @Autowired
-    private PedidoService pedidoService;
+    private final PedidoService pedidoService;
+    private final PedidoMapper pedidoMapper;
 
-    // Endpoint para que un cliente cree un nuevo pedido
-    @PostMapping("")
-    public ResponseEntity<?> crearPedido(@RequestBody PedidoCreateDTO pedidoCreateDTO) {
-        try {
-            PedidoResponseDTO nuevoPedido = pedidoService.crearPedido(pedidoCreateDTO);
-            return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    private final ArticuloInsumoRepository articuloInsumoRepository;
+    private final ArticuloManufacturadoRepository articuloManufacturadoRepository;
+    private final ClienteRepository clienteRepository;
+    private final DomicilioRepository domicilioRepository;
+    private final SucursalRepository sucursalRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ArticuloRepository articuloRepository;
+
+    @GetMapping
+    public ResponseEntity<List<PedidoDTO>> getAll() {
+        List<Pedido> pedidos = pedidoService.findAll();
+        return ResponseEntity.ok(
+                pedidos.stream().map(pedidoMapper::toDTO).toList()
+        );
     }
 
-    // Endpoint para obtener un pedido por su ID
-    // Tanto clientes (para sus propios pedidos) como empleados/admins podrían usarlo.
-    // La lógica de autorización (quién puede ver qué) se manejaría con Spring Security.
     @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerPedidoPorId(@PathVariable Long id) {
-        try {
-            PedidoResponseDTO pedido = pedidoService.findPedidoById(id);
-            return ResponseEntity.ok(pedido);
-        } catch (Exception e) {
-            // Si la excepción es "Pedido no encontrado", podría devolverse NOT_FOUND
-            if (e.getMessage().contains("no encontrado")) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<PedidoDTO> getById(@PathVariable Long id) {
+        Pedido pedido = pedidoService.findById(id);
+        return ResponseEntity.ok(pedidoMapper.toDTO(pedido));
     }
 
-    // Endpoint para que un cliente obtenga su historial de pedidos
-    @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<?> obtenerPedidosPorCliente(@PathVariable Long clienteId) {
-        // Aquí debería haber seguridad para asegurar que el clienteId corresponde al usuario autenticado
-        // o que el usuario autenticado es un administrador.
-        try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findByClienteId(clienteId); //
-            return ResponseEntity.ok(pedidos);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    @PostMapping
+    public ResponseEntity<PedidoDTO> create(@RequestBody PedidoCreateDTO dto) {
+        Pedido pedido = pedidoMapper.toEntity(dto);
+
+        // 🧩 Asignación de relaciones obligatorias
+        pedido.setCliente(clienteRepository.findById(dto.getClienteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado")));
+
+        pedido.setDomicilioEntrega(domicilioRepository.findById(dto.getDomicilioId())
+                .orElseThrow(() -> new ResourceNotFoundException("Domicilio no encontrado")));
+
+        // 🧩 Relaciones opcionales
+        if (dto.getSucursalId() != null) {
+            pedido.setSucursal(sucursalRepository.findById(dto.getSucursalId()).orElse(null));
         }
+
+        if (dto.getEmpleadoId() != null) {
+            pedido.setEmpleado(usuarioRepository.findById(dto.getEmpleadoId()).orElse(null));
+        }
+
+        // 🧾 Factura
+        if (dto.getFactura() != null) {
+            FacturaCreateDTO f = dto.getFactura();
+            Factura factura = Factura.builder()
+                    .fechaFacturacion(f.getFechaFacturacion())
+                    .mpPaymentId(f.getMpPaymentId())
+                    .mpMerchantOrderId(f.getMpMerchantOrderId())
+                    .mpPreferenceId(f.getMpPreferenceId())
+                    .mpPaymentType(f.getMpPaymentType())
+                    .formaPago(FormaPago.valueOf(String.valueOf(f.getFormaPago())))
+                    .totalVenta(f.getTotalVenta())
+                    .build();
+
+            pedido.setFactura(factura);
+        }
+
+        // 🧾 Detalles del pedido
+        if (dto.getDetalles() != null) {
+            Set<DetallePedido> detalles = dto.getDetalles().stream().map(detalleDTO -> {
+                DetallePedido detalle = new DetallePedido();
+                detalle.setCantidad(detalleDTO.getCantidad());
+                detalle.setSubTotal(detalleDTO.getSubTotal());
+
+                // Resolver el tipo de artículo según a cuál repositorio pertenezca
+                ArticuloInsumo insumo = articuloInsumoRepository.findById(detalleDTO.getArticuloId()).orElse(null);
+                if (insumo != null) {
+                    detalle.setArticuloInsumo(insumo);
+                } else {
+                    ArticuloManufacturado manufacturado = articuloManufacturadoRepository.findById(detalleDTO.getArticuloId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Artículo no encontrado"));
+                    detalle.setArticuloManufacturado(manufacturado);
+                }
+
+                detalle.setPedido(pedido); // relación inversa
+                return detalle;
+            }).collect(Collectors.toSet());
+
+            pedido.setDetallesPedidos(detalles);
+        }
+
+        Pedido saved = pedidoService.save(pedido);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedidoMapper.toDTO(saved));
     }
 
-    // Endpoint para que empleados/administradores listen pedidos por estado
-    @GetMapping("/estado/{estado}")
-    public ResponseEntity<?> obtenerPedidosPorEstado(@PathVariable Estado estado) {
-        // Este endpoint probablemente sería para roles de empleado/admin.
-        try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findByEstado(estado); //
-            return ResponseEntity.ok(pedidos);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        pedidoService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
-
-    // Endpoint para que empleados/administradores listen todos los pedidos
-    @GetMapping("")
-    public ResponseEntity<?> listarTodosLosPedidos() {
-        // Este endpoint probablemente sería para roles de empleado/admin.
-        try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findAllPedidos();
-            return ResponseEntity.ok(pedidos);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    // Endpoint para que empleados/administradores cambien el estado de un pedido
-    @PatchMapping("/{id}/cambiar-estado")
-    public ResponseEntity<?> cambiarEstadoPedido(@PathVariable Long id, @RequestParam Estado nuevoEstado) {
-        // Endpoint para empleados/admins.
-        try {
-            PedidoResponseDTO pedidoActualizado = pedidoService.cambiarEstadoPedido(id, nuevoEstado);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    // No suele haber un PUT para actualizar un pedido completo una vez creado,
-    // las modificaciones suelen ser cambios de estado o cancelación (que es un cambio de estado).
-    // La cancelación podría ser un endpoint específico si involucra lógica adicional más allá de cambiar el estado.
-
-    // @DeleteMapping("/{id}") // Borrar pedidos podría ser complejo debido a facturas, stock, etc.
-    // public ResponseEntity<?> cancelarPedido(@PathVariable Long id) {
-    //     // Usualmente, los pedidos no se eliminan físicamente, se cancelan (cambio de estado).
-    //     // Si se implementa delete, el servicio debe manejar la lógica de anulación (reponer stock, etc.)
-    //     try {
-    //         // Lógica para cancelar podría ser cambiar estado a CANCELADO
-    //         pedidoService.cambiarEstadoPedido(id, Estado.CANCELADO);
-    //         return ResponseEntity.ok("Pedido cancelado.");
-    //     } catch (Exception e) {
-    //         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    //     }
-    // }
 }

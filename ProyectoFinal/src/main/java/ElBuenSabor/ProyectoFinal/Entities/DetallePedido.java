@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class DetallePedido extends BaseEntity {
 
     private Integer cantidad; // Cantidad del artículo en este pedido

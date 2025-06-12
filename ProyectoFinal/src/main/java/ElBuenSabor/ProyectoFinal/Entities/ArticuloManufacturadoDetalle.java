@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class ArticuloManufacturadoDetalle extends BaseEntity {
 
     private Double cantidad; // Cantidad de insumo para este producto

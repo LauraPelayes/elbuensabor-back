@@ -1,20 +1,12 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnidadMedidaDTO {
-
     private Long id;
     private String denominacion;
-    private boolean estaDadoDeBaja;
 }

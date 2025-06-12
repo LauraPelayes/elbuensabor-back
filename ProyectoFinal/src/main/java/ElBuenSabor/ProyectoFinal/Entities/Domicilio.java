@@ -15,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class Domicilio extends BaseEntity {
 
     private String calle;
@@ -26,12 +26,11 @@ public class Domicilio extends BaseEntity {
     @JoinColumn(name = "localidad_id")
     private Localidad localidad;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "domicilio", cascade = CascadeType.ALL, orphanRemoval = true) // <--- ¡Aquí está el error! le cambie domicilioEntrega a domicilio
-    private Set<Pedido> pedidos = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
 
-    @Builder.Default // <-- AÑADE BUILDER.DEFAULT
-    @OneToMany(mappedBy = "domicilio", cascade = CascadeType.ALL)
-    private Set<Cliente> clientes = new HashSet<>();
+    @OneToMany(mappedBy = "domicilioEntrega")
+    private List<Pedido> pedidos;
 
 }

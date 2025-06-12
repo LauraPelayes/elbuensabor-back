@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class Localidad extends BaseEntity {
 
     private String nombre;

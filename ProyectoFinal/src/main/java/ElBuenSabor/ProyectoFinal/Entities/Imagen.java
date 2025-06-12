@@ -10,10 +10,10 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class Imagen extends BaseEntity {
-    @Column(length = 500)
-    private String denominacion; // Por ejemplo, la URL de la imagen
 
+    @Column(length = 500)
+    private String denominacion;
 
 }

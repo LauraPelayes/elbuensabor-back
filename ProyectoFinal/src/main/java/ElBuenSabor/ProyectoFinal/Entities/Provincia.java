@@ -13,12 +13,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class Provincia extends BaseEntity {
 
     private String nombre;
 
-    @Builder.Default
     @OneToMany(mappedBy = "provincia", cascade = CascadeType.ALL)
     private Set<Localidad> localidades = new HashSet<>();
 

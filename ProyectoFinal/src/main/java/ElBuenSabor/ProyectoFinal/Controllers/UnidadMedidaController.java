@@ -2,7 +2,9 @@ package ElBuenSabor.ProyectoFinal.Controllers;
 
 import ElBuenSabor.ProyectoFinal.DTO.UnidadMedidaDTO;
 import ElBuenSabor.ProyectoFinal.Entities.UnidadMedida;
+import ElBuenSabor.ProyectoFinal.Mappers.UnidadMedidaMapper;
 import ElBuenSabor.ProyectoFinal.Service.UnidadMedidaService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,94 +15,47 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/unidades-medida")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/unidades-medida")
+@RequiredArgsConstructor
 public class UnidadMedidaController {
 
-    @Autowired
-    private UnidadMedidaService unidadMedidaService;
+    private final UnidadMedidaService unidadService;
+    private final UnidadMedidaMapper unidadMapper;
 
-    @PostMapping("")
-    public ResponseEntity<?> createUnidadMedida(@RequestBody UnidadMedidaDTO unidadMedidaDTO) {
-        try {
-            UnidadMedida nuevaUnidad = unidadMedidaService.createUnidadMedida(unidadMedidaDTO);
-            return new ResponseEntity<>(convertToUnidadMedidaDTO(nuevaUnidad), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    // 🟢 Crear
+    @PostMapping
+    public ResponseEntity<UnidadMedidaDTO> create(@RequestBody UnidadMedidaDTO dto) {
+        UnidadMedida unidad = unidadMapper.toEntity(dto);
+        UnidadMedida saved = unidadService.save(unidad);
+        return ResponseEntity.status(HttpStatus.CREATED).body(unidadMapper.toDTO(saved));
     }
 
+    // 🔵 Obtener todos
+    @GetMapping
+    public ResponseEntity<List<UnidadMedidaDTO>> getAll() {
+        List<UnidadMedida> unidades = unidadService.findAll();
+        return ResponseEntity.ok(unidadMapper.toDTOList(unidades));
+    }
+
+    // 🟣 Obtener por ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUnidadMedidaById(@PathVariable Long id) {
-        try {
-            Optional<UnidadMedida> unidadOptional = unidadMedidaService.findById(id);
-            if (unidadOptional.isPresent()) {
-                return ResponseEntity.ok(convertToUnidadMedidaDTO(unidadOptional.get()));
-            } else {
-                return new ResponseEntity<>("Unidad de Medida no encontrada.", HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<UnidadMedidaDTO> getById(@PathVariable Long id) {
+        UnidadMedida unidad = unidadService.findById(id);
+        return ResponseEntity.ok(unidadMapper.toDTO(unidad));
     }
 
-    @GetMapping("/buscar")
-    public ResponseEntity<?> getUnidadMedidaByDenominacion(@RequestParam String denominacion) {
-        try {
-            UnidadMedida unidad = unidadMedidaService.findByDenominacion(denominacion);
-            if (unidad != null) {
-                return ResponseEntity.ok(convertToUnidadMedidaDTO(unidad));
-            } else {
-                return new ResponseEntity<>("Unidad de Medida no encontrada: " + denominacion, HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("")
-    public ResponseEntity<?> getAllUnidadesMedida() {
-        try {
-            List<UnidadMedida> unidades = unidadMedidaService.findAll();
-            List<UnidadMedidaDTO> dtos = unidades.stream()
-                    .map(this::convertToUnidadMedidaDTO)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(dtos);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
+    // 🟠 Actualizar
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUnidadMedida(@PathVariable Long id, @RequestBody UnidadMedidaDTO unidadMedidaDTO) {
-        try {
-            UnidadMedida unidadActualizada = unidadMedidaService.updateUnidadMedida(id, unidadMedidaDTO);
-            return ResponseEntity.ok(convertToUnidadMedidaDTO(unidadActualizada));
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<UnidadMedidaDTO> update(@PathVariable Long id, @RequestBody UnidadMedidaDTO dto) {
+        UnidadMedida unidad = unidadMapper.toEntity(dto);
+        UnidadMedida updated = unidadService.update(id, unidad);
+        return ResponseEntity.ok(unidadMapper.toDTO(updated));
     }
 
+    // 🔴 Eliminar
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUnidadMedida(@PathVariable Long id) {
-        try {
-            // Considerar no eliminar si está en uso por algún artículo.
-            boolean eliminado = unidadMedidaService.delete(id);
-            if (eliminado) {
-                return ResponseEntity.ok("Unidad de Medida eliminada correctamente.");
-            } else {
-                return new ResponseEntity<>("Unidad de Medida no encontrada.", HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    private UnidadMedidaDTO convertToUnidadMedidaDTO(UnidadMedida unidad) {
-        if (unidad == null) return null;
-        UnidadMedidaDTO dto = new UnidadMedidaDTO();
-        dto.setId(unidad.getId());
-        dto.setDenominacion(unidad.getDenominacion());
-        return dto;
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        unidadService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,10 +1,11 @@
 package ElBuenSabor.ProyectoFinal.Entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "unidad_medida")
@@ -12,8 +13,13 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 public class UnidadMedida extends BaseEntity {
+
     @Column(unique = true)
-    private String denominacion; // Ej: "kg", "gr", "unidad", "litro"
+    private String denominacion;
+
+    @OneToMany(mappedBy = "unidadMedida", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Articulo> articulos = new ArrayList<>();
+
 }

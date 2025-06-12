@@ -1,21 +1,22 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
 import ElBuenSabor.ProyectoFinal.Entities.FormaPago;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+import java.time.LocalDate;
+
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class FacturaCreateDTO {
 
-    private Long id;
-    private Long pedidoId;
-    private FormaPago formaPago;
+    private LocalDate fechaFacturacion;
+    private Integer mpPaymentId;
+    private Integer mpMerchantOrderId;
+    private String mpPreferenceId;
+    private String mpPaymentType;
+
+    private FormaPago formaPago; // seguirá siendo string, lo convertimos con valueOf
     private Double totalVenta;
-
-
 }

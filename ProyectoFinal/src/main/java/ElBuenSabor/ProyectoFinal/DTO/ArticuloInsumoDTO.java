@@ -1,32 +1,24 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArticuloInsumoDTO {
 
     private Long id;
-    private boolean estaDadoDeBaja;
     private String denominacion;
     private Double precioVenta;
+    private Long imagenId;
+    private Long unidadMedidaId;
+    private Long categoriaId;
+
     private Double precioCompra;
     private Double stockActual;
     private Double stockMinimo;
     private Boolean esParaElaborar;
-    private Long unidadMedidaId;
-    private UnidadMedidaDTO unidadMedida; // For response
-    private Long categoriaId;
-    private CategoriaDTO categoria; // For response
-    private ImagenDTO imagen; // Could be just an ID for request, or a nested DTO
-    private Long imagenId; // For create/update if imagen is separate
 
 }
