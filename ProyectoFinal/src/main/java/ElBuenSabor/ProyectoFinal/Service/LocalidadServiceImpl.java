@@ -35,7 +35,7 @@ public class LocalidadServiceImpl implements LocalidadService {
         Localidad actual = findById(id);
         actual.setNombre(localidad.getNombre());
         actual.setProvincia(localidad.getProvincia());
-        actual.setBaja(localidad.isBaja());
+        actual.setBaja(localidad.getBaja());
         return localidadRepository.save(actual);
     }
 

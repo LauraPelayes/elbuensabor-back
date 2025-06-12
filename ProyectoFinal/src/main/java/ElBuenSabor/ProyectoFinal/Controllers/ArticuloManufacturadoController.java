@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/articulos-manufacturados")
+@RequestMapping("/api/articulos")
 @RequiredArgsConstructor
 public class ArticuloManufacturadoController {
 
@@ -26,7 +26,7 @@ public class ArticuloManufacturadoController {
     private final UnidadMedidaRepository unidadMedidaRepository;
     private final ImagenRepository imagenRepository;
 
-    @GetMapping
+    @GetMapping("/manufacturados")
     public ResponseEntity<List<ArticuloManufacturadoDTO>> getAll() {
         return ResponseEntity.ok(
                 service.findAll().stream()

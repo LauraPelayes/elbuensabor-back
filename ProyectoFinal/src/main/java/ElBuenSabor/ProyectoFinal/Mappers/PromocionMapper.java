@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = { SucursalMapper.class })
+@Mapper(componentModel = "spring")
 public interface PromocionMapper {
 
     PromocionDTO toDTO(Promocion entity);
