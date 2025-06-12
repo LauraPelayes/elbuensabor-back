@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/articulos")
+@RequestMapping("/api/articuloManufacturado")
 @RequiredArgsConstructor
 public class ArticuloManufacturadoController {
 
@@ -54,6 +54,7 @@ public class ArticuloManufacturadoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ArticuloManufacturadoDTO> update(@PathVariable Long id, @RequestBody ArticuloManufacturadoCreateDTO dto) {
+
         ArticuloManufacturado entity = mapper.toEntity(dto);
 
         entity.setCategoria(categoriaRepository.findById(dto.getCategoriaId()).orElse(null));

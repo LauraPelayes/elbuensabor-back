@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/articulosInsumo")
+@RequestMapping("/api/articuloInsumo")
 @RequiredArgsConstructor
 public class ArticuloInsumoController {
 
@@ -26,7 +26,7 @@ public class ArticuloInsumoController {
     private final UnidadMedidaRepository unidadMedidaRepository;
     private final ImagenRepository imagenRepository;
 
-    @GetMapping
+    @GetMapping("/insumos")
     public ResponseEntity<List<ArticuloInsumoDTO>> getAll() {
         return ResponseEntity.ok(
                 articuloInsumoService.findAll().stream()
