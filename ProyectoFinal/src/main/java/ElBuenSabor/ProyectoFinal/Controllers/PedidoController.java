@@ -1,9 +1,9 @@
 package ElBuenSabor.ProyectoFinal.Controllers;
 
 import ElBuenSabor.ProyectoFinal.DTO.PedidoCreateDTO;
-import ElBuenSabor.ProyectoFinal.DTO.PedidoResponseDTO;
-import ElBuenSabor.ProyectoFinal.Entities.Estado;
-import ElBuenSabor.ProyectoFinal.Service.PedidoService;
+import ElBuenSabor.ProyectoFinal.DTO.PedidoResponseDTO; // Importa tu DTO de respuesta
+import ElBuenSabor.ProyectoFinal.Entities.Estado; // Para el método actualizarEstadoPedido
+import ElBuenSabor.ProyectoFinal.Service.PedidoService; // Usa la interfaz de tu servicio
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,105 +12,91 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/pedidos")
-@CrossOrigin(origins = "*") // Ajustar según necesidades
+@RequestMapping("/api/pedidos")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PedidoController {
 
     @Autowired
-    private PedidoService pedidoService;
+    private PedidoService pedidoService; // Usa la interfaz PedidoService
 
-    // Endpoint para que un cliente cree un nuevo pedido
-    @PostMapping("")
-    public ResponseEntity<?> crearPedido(@RequestBody PedidoCreateDTO pedidoCreateDTO) {
+    // Endpoint para crear un nuevo pedido desde el frontend
+    // Este endpoint se usaría si quieres crear un pedido en tu DB y obtener su ID ANTES de ir a Mercado Pago,
+    // o si el pago es en efectivo y no usa MP.
+    @PostMapping
+    public ResponseEntity<?> createPedido(@RequestBody PedidoCreateDTO pedidoDTO) {
         try {
-            PedidoResponseDTO nuevoPedido = pedidoService.crearPedido(pedidoCreateDTO);
-            return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
+            PedidoResponseDTO newPedido = pedidoService.crearPedido(pedidoDTO); // Llama al método del servicio
+            return ResponseEntity.status(HttpStatus.CREATED).body(newPedido); // Devuelve el DTO completo
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear el pedido: " + e.getMessage());
         }
     }
 
-    // Endpoint para obtener un pedido por su ID
-    // Tanto clientes (para sus propios pedidos) como empleados/admins podrían usarlo.
-    // La lógica de autorización (quién puede ver qué) se manejaría con Spring Security.
+    // Endpoint para obtener un pedido por ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerPedidoPorId(@PathVariable Long id) {
+    public ResponseEntity<?> getPedidoById(@PathVariable Long id) {
         try {
-            PedidoResponseDTO pedido = pedidoService.findPedidoById(id);
-            return ResponseEntity.ok(pedido);
+            PedidoResponseDTO pedido = pedidoService.findPedidoById(id); // Llama al método del servicio
+            return ResponseEntity.ok(pedido); // Devuelve el DTO completo
         } catch (Exception e) {
-            // Si la excepción es "Pedido no encontrado", podría devolverse NOT_FOUND
-            if (e.getMessage().contains("no encontrado")) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pedido no encontrado o error: " + e.getMessage());
         }
     }
 
-    // Endpoint para que un cliente obtenga su historial de pedidos
+    // Endpoint para obtener todos los pedidos
+    @GetMapping
+    public ResponseEntity<List<PedidoResponseDTO>> getAllPedidos() {
+        try {
+            List<PedidoResponseDTO> pedidos = pedidoService.findAllPedidos(); // Llama al método del servicio
+            return ResponseEntity.ok(pedidos); // Devuelve la lista de DTOs
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // O un mensaje de error más específico
+        }
+    }
+
+    // Endpoint para actualizar el estado de un pedido (ej. por un empleado)
+    // El webhook de MP se encargaría del estado de pago, este es para otros cambios.
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<?> updatePedidoEstado(@PathVariable Long id, @RequestParam Estado nuevoEstado) {
+        try {
+            PedidoResponseDTO updatedPedido = pedidoService.actualizarEstadoPedido(id, nuevoEstado);
+            return ResponseEntity.ok(updatedPedido);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar el estado del pedido: " + e.getMessage());
+        }
+    }
+
+    // Endpoint para obtener pedidos por ID de cliente
     @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<?> obtenerPedidosPorCliente(@PathVariable Long clienteId) {
-        // Aquí debería haber seguridad para asegurar que el clienteId corresponde al usuario autenticado
-        // o que el usuario autenticado es un administrador.
+    public ResponseEntity<List<PedidoResponseDTO>> getPedidosByClienteId(@PathVariable Long clienteId) {
         try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findByClienteId(clienteId); //
+            List<PedidoResponseDTO> pedidos = pedidoService.findPedidosByClienteId(clienteId);
             return ResponseEntity.ok(pedidos);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
-    // Endpoint para que empleados/administradores listen pedidos por estado
+    // Endpoint para obtener pedidos por estado
     @GetMapping("/estado/{estado}")
-    public ResponseEntity<?> obtenerPedidosPorEstado(@PathVariable Estado estado) {
-        // Este endpoint probablemente sería para roles de empleado/admin.
+    public ResponseEntity<List<PedidoResponseDTO>> getPedidosByEstado(@PathVariable Estado estado) {
         try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findByEstado(estado); //
+            List<PedidoResponseDTO> pedidos = pedidoService.findPedidosByEstado(estado);
             return ResponseEntity.ok(pedidos);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
-    // Endpoint para que empleados/administradores listen todos los pedidos
-    @GetMapping("")
-    public ResponseEntity<?> listarTodosLosPedidos() {
-        // Este endpoint probablemente sería para roles de empleado/admin.
+    // Endpoint para marcar un pedido como pagado (ej. para pagos en efectivo)
+    // Este NO se usaría para pagos de Mercado Pago, ya que eso lo manejaría el webhook.
+    @PutMapping("/{id}/marcar-pagado")
+    public ResponseEntity<?> marcarPedidoComoPagado(@PathVariable Long id) {
         try {
-            List<PedidoResponseDTO> pedidos = pedidoService.findAllPedidos();
-            return ResponseEntity.ok(pedidos);
+            PedidoResponseDTO updatedPedido = pedidoService.marcarPedidoComoPagado(id);
+            return ResponseEntity.ok(updatedPedido);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al marcar pedido como pagado: " + e.getMessage());
         }
     }
-
-
-    // Endpoint para que empleados/administradores cambien el estado de un pedido
-    @PatchMapping("/{id}/cambiar-estado")
-    public ResponseEntity<?> cambiarEstadoPedido(@PathVariable Long id, @RequestParam Estado nuevoEstado) {
-        // Endpoint para empleados/admins.
-        try {
-            PedidoResponseDTO pedidoActualizado = pedidoService.cambiarEstadoPedido(id, nuevoEstado);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    // No suele haber un PUT para actualizar un pedido completo una vez creado,
-    // las modificaciones suelen ser cambios de estado o cancelación (que es un cambio de estado).
-    // La cancelación podría ser un endpoint específico si involucra lógica adicional más allá de cambiar el estado.
-
-    // @DeleteMapping("/{id}") // Borrar pedidos podría ser complejo debido a facturas, stock, etc.
-    // public ResponseEntity<?> cancelarPedido(@PathVariable Long id) {
-    //     // Usualmente, los pedidos no se eliminan físicamente, se cancelan (cambio de estado).
-    //     // Si se implementa delete, el servicio debe manejar la lógica de anulación (reponer stock, etc.)
-    //     try {
-    //         // Lógica para cancelar podría ser cambiar estado a CANCELADO
-    //         pedidoService.cambiarEstadoPedido(id, Estado.CANCELADO);
-    //         return ResponseEntity.ok("Pedido cancelado.");
-    //     } catch (Exception e) {
-    //         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    //     }
-    // }
 }

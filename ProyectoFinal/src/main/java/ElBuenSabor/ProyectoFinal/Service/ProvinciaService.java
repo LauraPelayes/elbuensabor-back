@@ -3,6 +3,8 @@ package ElBuenSabor.ProyectoFinal.Service;
 import ElBuenSabor.ProyectoFinal.DTO.ProvinciaCreateUpdateDTO;
 import ElBuenSabor.ProyectoFinal.DTO.ProvinciaDTO; // Para respuestas
 import ElBuenSabor.ProyectoFinal.Entities.Provincia;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 public interface ProvinciaService extends BaseService<Provincia, Long> {

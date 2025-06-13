@@ -1,37 +1,33 @@
+// src/main/java/ElBuenSabor/ProyectoFinal/Service/PedidoService.java
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.DTO.PedidoCreateDTO;
-// Considera un PedidoUpdateDTO si la actualización es diferente a la creación o muy limitada
-import ElBuenSabor.ProyectoFinal.DTO.PedidoResponseDTO; // Para devolver datos formateados
+import ElBuenSabor.ProyectoFinal.DTO.PedidoResponseDTO;
 import ElBuenSabor.ProyectoFinal.Entities.Estado;
-import ElBuenSabor.ProyectoFinal.Entities.Pedido;
-import org.springframework.transaction.annotation.Transactional;
+import ElBuenSabor.ProyectoFinal.Entities.Pedido; // ¡Importa Pedido aquí!
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PedidoService extends BaseService<Pedido, Long> {
 
-    PedidoResponseDTO crearPedido(PedidoCreateDTO pedidoCreateDTO) throws Exception;
+    // Método original para crear y devolver DTO al frontend
+    PedidoResponseDTO crearPedido(PedidoCreateDTO pedidoDTO) throws Exception;
 
-    PedidoResponseDTO findPedidoById(Long id) throws Exception; // Para obtener un DTO específico
+    // *** NUEVO MÉTODO: Para crear el pedido y devolver la ENTIDAD PERSISTIDA ***
+    Pedido crearPedidoEntidad(PedidoCreateDTO pedidoDTO) throws Exception;
 
-    List<PedidoResponseDTO> findAllPedidos() throws Exception; // Para obtener todos como DTO
 
-    @Transactional
-    PedidoResponseDTO actualizarEstadoPedido(Long pedidoId, Estado nuevoEstado) throws Exception;
-
-    @Transactional(readOnly = true)
+    // Métodos para buscar pedidos y devolver DTOs
+    PedidoResponseDTO findPedidoById(Long id) throws Exception;
+    List<PedidoResponseDTO> findAllPedidos() throws Exception;
     List<PedidoResponseDTO> findPedidosByClienteId(Long clienteId) throws Exception;
-
-    @Transactional(readOnly = true)
     List<PedidoResponseDTO> findPedidosByEstado(Estado estado) throws Exception;
 
-    // Otros métodos como marcar como pagado, anular, etc.
-    PedidoResponseDTO marcarPedidoComoPagado(Long pedidoId) throws Exception; // HU#15 (para efectivo)
+    // Método para actualizar el estado del pedido
+    PedidoResponseDTO actualizarEstadoPedido(Long pedidoId, Estado nuevoEstado) throws Exception;
 
-    List<PedidoResponseDTO> findByClienteId(Long clienteId);
-
-    List<PedidoResponseDTO> findByEstado(Estado estado);
-
-    PedidoResponseDTO cambiarEstadoPedido(Long id, Estado nuevoEstado);
+    // Método para marcar pedido como pagado (ej. efectivo)
+    PedidoResponseDTO marcarPedidoComoPagado(Long pedidoId) throws Exception;
 }
