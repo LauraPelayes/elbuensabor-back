@@ -1,6 +1,9 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
 import ElBuenSabor.ProyectoFinal.Entities.FormaPago;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +15,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FacturaDTO {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate fechaFacturacion;
     private Integer mpPaymentId;

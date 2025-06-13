@@ -3,6 +3,9 @@ package ElBuenSabor.ProyectoFinal.DTO;
 import ElBuenSabor.ProyectoFinal.Entities.Estado;
 import ElBuenSabor.ProyectoFinal.Entities.TipoEnvio;
 import ElBuenSabor.ProyectoFinal.Entities.FormaPago;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +20,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class PedidoResponseDTO {
     //Para ver un pedido
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime horaEstimadaFinalizacion;
     private Double total;

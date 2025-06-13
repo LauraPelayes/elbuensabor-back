@@ -1,6 +1,6 @@
 package ElBuenSabor.ProyectoFinal.Controllers;
 
-import ElBuenSabor.ProyectoFinal.DTO.CategoriaCreateUpdateDTO;
+import ElBuenSabor.ProyectoFinal.DTO.CategoriaShortDTO;
 import ElBuenSabor.ProyectoFinal.DTO.CategoriaDTO;
 import ElBuenSabor.ProyectoFinal.Entities.Categoria;
 import ElBuenSabor.ProyectoFinal.Entities.Sucursal;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.Set; // Para el set de sucursales en el DTO
 
 @RestController
 @RequestMapping("/api/v1/categorias")
@@ -25,7 +24,7 @@ public class CategoriaController {
 
     // Endpoint para crear una nueva categoría
     @PostMapping("")
-    public ResponseEntity<?> crearCategoria(@RequestBody CategoriaCreateUpdateDTO categoriaCreateUpdateDTO) {
+    public ResponseEntity<?> crearCategoria(@RequestBody CategoriaShortDTO categoriaCreateUpdateDTO) {
         try {
             Categoria nuevaCategoria = categoriaService.createCategoria(categoriaCreateUpdateDTO);
             return new ResponseEntity<>(convertToCategoriaDTO(nuevaCategoria), HttpStatus.CREATED);
@@ -51,7 +50,7 @@ public class CategoriaController {
 
     // Endpoint para actualizar una categoría
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarCategoria(@PathVariable Long id, @RequestBody CategoriaCreateUpdateDTO categoriaCreateUpdateDTO) {
+    public ResponseEntity<?> actualizarCategoria(@PathVariable Long id, @RequestBody CategoriaShortDTO categoriaCreateUpdateDTO) {
         try {
             Categoria categoriaActualizada = categoriaService.updateCategoria(id, categoriaCreateUpdateDTO);
             return ResponseEntity.ok(convertToCategoriaDTO(categoriaActualizada));
