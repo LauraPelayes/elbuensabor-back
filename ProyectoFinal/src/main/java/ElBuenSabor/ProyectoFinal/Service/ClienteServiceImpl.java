@@ -42,7 +42,7 @@ public class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implement
             if (updatedCliente.getDomicilios() != null) {
                 existente.getDomicilios().clear();
                 existente.getDomicilios().addAll(updatedCliente.getDomicilios());
-                existente.getDomicilios().forEach(domicilio -> domicilio.setCliente(existente));
+
             }
 
 

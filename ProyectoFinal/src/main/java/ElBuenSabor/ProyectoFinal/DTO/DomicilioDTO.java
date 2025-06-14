@@ -1,3 +1,4 @@
+// ProyectoFinal/src/main/java/ElBuenSabor/ProyectoFinal/DTO/DomicilioDTO.java
 package ElBuenSabor.ProyectoFinal.DTO;
 
 import lombok.*;
@@ -14,4 +15,6 @@ public class DomicilioDTO {
     private Integer cp;
 
     private LocalidadDTO localidad;
+    // ASEGÚRATE DE QUE NO TIENE ESTO (y de hecho, no lo tiene):
+    // private ClienteDTO cliente;
 }

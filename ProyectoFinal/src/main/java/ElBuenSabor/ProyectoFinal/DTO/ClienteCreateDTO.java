@@ -1,9 +1,10 @@
+// ProyectoFinal/src/main/java/ElBuenSabor/ProyectoFinal/DTO/ClienteCreateDTO.java
 package ElBuenSabor.ProyectoFinal.DTO;
 
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.List; // Importa List
 
 @Data
 @Builder
@@ -20,5 +21,10 @@ public class ClienteCreateDTO {
 
     private Long usuarioId;
     private Long imagenId;
-    private List<Long> domicilioIds;
+    // CAMBIA ESTO:
+    // private List<Long> domicilioIds; // Ya lo tenías así, ¡genial!
+
+    // Si `domicilioIds` ya está como `List<Long>`, entonces tu DTO ya está adaptado.
+    // Solo confirma que tienes `List<Long> domicilioIds;`
+    private List<Long> domicilioIds; // Esto ya estaba bien, solo reconfirmamos.
 }

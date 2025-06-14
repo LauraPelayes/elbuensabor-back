@@ -18,7 +18,8 @@ public abstract class BaseEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "baja")
+    @Column(name = "baja" )
+    @Builder.Default
     private Boolean baja = false;
 
 }
