@@ -1,51 +1,37 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
-import ElBuenSabor.ProyectoFinal.DTO.CategoriaShortDTO;
 import ElBuenSabor.ProyectoFinal.Entities.Categoria;
-import ElBuenSabor.ProyectoFinal.Entities.Sucursal;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+// ResourceNotFoundException ya se maneja en BaseServiceImpl
+// import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
 import ElBuenSabor.ProyectoFinal.Repositories.CategoriaRepository;
-import ElBuenSabor.ProyectoFinal.Repositories.SucursalRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+// Ya no es necesario si se inyecta por constructor explícito al padre
+// import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class CategoriaServiceImpl implements CategoriaService {
 
-    private final CategoriaRepository categoriaRepository;
+public class CategoriaServiceImpl extends BaseServiceImpl<Categoria, Long> implements CategoriaService {
 
-    @Override
-    public List<Categoria> findAll() {
-        return categoriaRepository.findAll();
+
+    public CategoriaServiceImpl(CategoriaRepository categoriaRepository) {
+        super(categoriaRepository); // Llama al constructor de la clase base
     }
 
     @Override
-    public Categoria findById(Long id) {
-        return categoriaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + id));
-    }
+    @Transactional
+    public Categoria update(Long id, Categoria updated) throws Exception {
+        try {
+            Categoria actual = findById(id);
 
-    @Override
-    public Categoria save(Categoria categoria) {
-        return categoriaRepository.save(categoria);
-    }
+            actual.setDenominacion(updated.getDenominacion());
+            actual.setCategoriaPadre(updated.getCategoriaPadre());
 
-    @Override
-    public Categoria update(Long id, Categoria categoria) {
-        Categoria actual = findById(id);
-        actual.setDenominacion(categoria.getDenominacion());
-        actual.setCategoriaPadre(categoria.getCategoriaPadre());
-        return categoriaRepository.save(actual);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        categoriaRepository.deleteById(id);
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+            throw new Exception("Error al actualizar la categoría: " + e.getMessage());
+        }
     }
 }

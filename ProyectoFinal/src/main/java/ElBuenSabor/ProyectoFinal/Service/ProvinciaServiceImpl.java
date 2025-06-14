@@ -1,45 +1,36 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.Provincia;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.ProvinciaRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class ProvinciaServiceImpl implements ProvinciaService {
 
-    private final ProvinciaRepository provinciaRepository;
+public class ProvinciaServiceImpl extends BaseServiceImpl<Provincia, Long> implements ProvinciaService {
 
-    @Override
-    public List<Provincia> findAll() {
-        return provinciaRepository.findAll();
+    public ProvinciaServiceImpl(ProvinciaRepository provinciaRepository) {
+        super(provinciaRepository);
     }
 
-    @Override
-    public Provincia findById(Long id) {
-        return provinciaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Provincia no encontrada con ID: " + id));
-    }
 
     @Override
-    public Provincia save(Provincia provincia) {
-        return provinciaRepository.save(provincia);
-    }
+    @Transactional
+    public Provincia update(Long id, Provincia updatedProvincia) throws Exception { // <<-- Añadir throws Exception
+        try {
 
-    @Override
-    public Provincia update(Long id, Provincia provincia) {
-        Provincia actual = findById(id);
-        actual.setNombre(provincia.getNombre());
-        actual.setPais(provincia.getPais());
-        return provinciaRepository.save(actual);
-    }
+            Provincia actual = findById(id);
 
-    @Override
-    public void deleteById(Long id) {
-        provinciaRepository.deleteById(id);
+            actual.setNombre(updatedProvincia.getNombre());
+            actual.setPais(updatedProvincia.getPais());
+
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+
+            throw new Exception("Error al actualizar la provincia: " + e.getMessage());
+        }
     }
 }

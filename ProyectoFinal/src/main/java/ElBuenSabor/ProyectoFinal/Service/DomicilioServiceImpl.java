@@ -1,47 +1,40 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.Domicilio;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.DomicilioRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class DomicilioServiceImpl implements DomicilioService {
 
-    private final DomicilioRepository domicilioRepository;
+public class DomicilioServiceImpl extends BaseServiceImpl<Domicilio, Long> implements DomicilioService {
 
-    @Override
-    public List<Domicilio> findAll() {
-        return domicilioRepository.findAll();
+
+    public DomicilioServiceImpl(DomicilioRepository domicilioRepository) {
+        super(domicilioRepository); // Llama al constructor de la clase base
     }
 
-    @Override
-    public Domicilio findById(Long id) {
-        return domicilioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Domicilio no encontrado con ID: " + id));
-    }
+
 
     @Override
-    public Domicilio save(Domicilio domicilio) {
-        return domicilioRepository.save(domicilio);
-    }
+    @Transactional
+    public Domicilio update(Long id, Domicilio updatedDomicilio) throws Exception {
+        try {
+            Domicilio actual = findById(id); //
 
-    @Override
-    public Domicilio update(Long id, Domicilio domicilio) {
-        Domicilio actual = findById(id);
-        actual.setCalle(domicilio.getCalle());
-        actual.setNumero(domicilio.getNumero());
-        actual.setCp(domicilio.getCp());
-        actual.setLocalidad(domicilio.getLocalidad());
-        return domicilioRepository.save(actual);
-    }
+            actual.setCalle(updatedDomicilio.getCalle()); //
+            actual.setNumero(updatedDomicilio.getNumero()); //
+            actual.setCp(updatedDomicilio.getCp()); //
+            actual.setLocalidad(updatedDomicilio.getLocalidad()); //
 
-    @Override
-    public void deleteById(Long id) {
-        domicilioRepository.deleteById(id);
+
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+
+            throw new Exception("Error al actualizar el domicilio: " + e.getMessage());
+        }
     }
 }

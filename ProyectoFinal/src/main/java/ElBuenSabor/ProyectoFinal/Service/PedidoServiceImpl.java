@@ -3,16 +3,12 @@ package ElBuenSabor.ProyectoFinal.Service;
 import ElBuenSabor.ProyectoFinal.DTO.*;
 import ElBuenSabor.ProyectoFinal.Entities.*;
 import ElBuenSabor.ProyectoFinal.Entities.Estado;
-
-
 import ElBuenSabor.ProyectoFinal.Entities.FormaPago;
 import ElBuenSabor.ProyectoFinal.Entities.TipoEnvio;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,52 +19,48 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-public class PedidoServiceImpl implements PedidoService {
 
-    private final PedidoRepository pedidoRepository;
-
-    @Override
-    public Pedido findById(Long id) {
-        return pedidoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
+public class PedidoServiceImpl extends BaseServiceImpl<Pedido, Long> implements PedidoService {
+    public PedidoServiceImpl(PedidoRepository pedidoRepository) {
+        super(pedidoRepository);
     }
 
     @Override
-    public List<Pedido> findAll() {
-        return pedidoRepository.findAll();
-    }
+    @Transactional
+    public Pedido update(Long id, Pedido updatedPedido) throws Exception {
+        try {
+            Pedido actual = findById(id);
 
-    @Override
-    public Pedido save(Pedido pedido) {
-        return pedidoRepository.save(pedido); // guarda Pedido + Factura + Detalles gracias a Cascade
-    }
+            actual.setFechaPedido(updatedPedido.getFechaPedido());
+            actual.setHoraEstimadaFinalizacion(updatedPedido.getHoraEstimadaFinalizacion());
+            actual.setTotal(updatedPedido.getTotal());
+            actual.setTotalCosto(updatedPedido.getTotalCosto());
+            actual.setEstado(updatedPedido.getEstado());
+            actual.setTipoEnvio(updatedPedido.getTipoEnvio());
+            actual.setFormaPago(updatedPedido.getFormaPago());
+            actual.setCliente(updatedPedido.getCliente());
+            actual.setEmpleado(updatedPedido.getEmpleado());
+            actual.setSucursal(updatedPedido.getSucursal());
+            actual.setDomicilioEntrega(updatedPedido.getDomicilioEntrega());
 
-    @Override
-    public Pedido update(Long id, Pedido updated) {
-        Pedido actual = findById(id);
+            actual.setFactura(updatedPedido.getFactura());
 
-        actual.setFechaPedido(updated.getFechaPedido());
-        actual.setHoraEstimadaFinalizacion(updated.getHoraEstimadaFinalizacion());
-        actual.setTotal(updated.getTotal());
-        actual.setTotalCosto(updated.getTotalCosto());
-        actual.setEstado(updated.getEstado());
-        actual.setTipoEnvio(updated.getTipoEnvio());
-        actual.setFormaPago(updated.getFormaPago());
-
-        actual.setCliente(updated.getCliente());
-        actual.setEmpleado(updated.getEmpleado());
-        actual.setSucursal(updated.getSucursal());
-        actual.setDomicilioEntrega(updated.getDomicilioEntrega());
-        actual.setFactura(updated.getFactura());
-        actual.setDetallesPedidos(updated.getDetallesPedidos());
-
-        return pedidoRepository.save(actual);
-    }
+            if (updatedPedido.getDetallesPedidos() != null) {
+                actual.getDetallesPedidos().clear(); // Limpia los detalles existentes
+                for (DetallePedido detalle : updatedPedido.getDetallesPedidos()) {
+                    detalle.setPedido(actual); // Asegura la relación inversa
+                    actual.getDetallesPedidos().add(detalle);
+                }
+            } else {
+                actual.getDetallesPedidos().clear(); // Si no se envían detalles, limpiar los existentes
+            }
 
 
-    @Override
-    public void deleteById(Long id) {
-        pedidoRepository.deleteById(id);
+
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+
+            throw new Exception("Error al actualizar el pedido: " + e.getMessage());
+        }
     }
 }

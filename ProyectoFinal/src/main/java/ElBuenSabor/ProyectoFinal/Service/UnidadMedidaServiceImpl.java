@@ -1,44 +1,34 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.UnidadMedida;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.UnidadMedidaRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class UnidadMedidaServiceImpl implements UnidadMedidaService {
+public class UnidadMedidaServiceImpl extends BaseServiceImpl<UnidadMedida, Long> implements UnidadMedidaService {
 
-    private final UnidadMedidaRepository unidadRepository;
 
-    @Override
-    public List<UnidadMedida> findAll() {
-        return unidadRepository.findAll();
+    public UnidadMedidaServiceImpl(UnidadMedidaRepository unidadMedidaRepository) {
+        super(unidadMedidaRepository); // Llama al constructor de la clase base
     }
 
     @Override
-    public UnidadMedida findById(Long id) {
-        return unidadRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Unidad de medida no encontrada con ID: " + id));
-    }
+    @Transactional
+    public UnidadMedida update(Long id, UnidadMedida updatedUnidad) throws Exception { // <<-- Añadir throws Exception
+        try {
 
-    @Override
-    public UnidadMedida save(UnidadMedida unidad) {
-        return unidadRepository.save(unidad);
-    }
+            UnidadMedida actual = findById(id);
 
-    @Override
-    public UnidadMedida update(Long id, UnidadMedida unidad) {
-        UnidadMedida actual = findById(id);
-        actual.setDenominacion(unidad.getDenominacion());
-        return unidadRepository.save(actual);
-    }
+            actual.setDenominacion(updatedUnidad.getDenominacion());
 
-    @Override
-    public void deleteById(Long id) {
-        unidadRepository.deleteById(id);
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+
+            throw new Exception("Error al actualizar la unidad de medida: " + e.getMessage());
+        }
     }
 }

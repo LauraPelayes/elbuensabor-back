@@ -1,46 +1,36 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.Empresa;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.EmpresaRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class EmpresaServiceImpl implements EmpresaService {
 
-    private final EmpresaRepository empresaRepository;
+public class EmpresaServiceImpl extends BaseServiceImpl<Empresa, Long> implements EmpresaService {
 
-    @Override
-    public List<Empresa> findAll() {
-        return empresaRepository.findAll();
+
+    public EmpresaServiceImpl(EmpresaRepository empresaRepository) {
+        super(empresaRepository);
     }
 
     @Override
-    public Empresa findById(Long id) {
-        return empresaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Empresa no encontrada con ID: " + id));
-    }
+    @Transactional
+    public Empresa update(Long id, Empresa updatedEmpresa) throws Exception {
+        try {
+            Empresa actual = findById(id);
 
-    @Override
-    public Empresa save(Empresa empresa) {
-        return empresaRepository.save(empresa);
-    }
+            actual.setNombre(updatedEmpresa.getNombre());
+            actual.setRazonSocial(updatedEmpresa.getRazonSocial());
+            actual.setCuil(updatedEmpresa.getCuil());
 
-    @Override
-    public Empresa update(Long id, Empresa empresa) {
-        Empresa actual = findById(id);
-        actual.setNombre(empresa.getNombre());
-        actual.setRazonSocial(empresa.getRazonSocial());
-        actual.setCuil(empresa.getCuil());
-        return empresaRepository.save(actual);
-    }
+            return baseRepository.save(actual);
+        } catch (Exception e) {
 
-    @Override
-    public void deleteById(Long id) {
-        empresaRepository.deleteById(id);
+            throw new Exception("Error al actualizar la empresa: " + e.getMessage());
+        }
     }
 }

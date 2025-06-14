@@ -1,46 +1,33 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.Localidad;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.LocalidadRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class LocalidadServiceImpl implements LocalidadService {
 
-    private final LocalidadRepository localidadRepository;
+public class LocalidadServiceImpl extends BaseServiceImpl<Localidad, Long> implements LocalidadService {
 
-    @Override
-    public List<Localidad> findAll() {
-        return localidadRepository.findAll();
+    public LocalidadServiceImpl(LocalidadRepository localidadRepository) {
+        super(localidadRepository);
     }
 
     @Override
-    public Localidad findById(Long id) {
-        return localidadRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Localidad no encontrada con ID: " + id));
-    }
+    @Transactional
+    public Localidad update(Long id, Localidad updatedLocalidad) throws Exception {
+        try {
+            Localidad actual = findById(id);
 
-    @Override
-    public Localidad save(Localidad localidad) {
-        return localidadRepository.save(localidad);
-    }
-
-    @Override
-    public Localidad update(Long id, Localidad localidad) {
-        Localidad actual = findById(id);
-        actual.setNombre(localidad.getNombre());
-        actual.setProvincia(localidad.getProvincia());
-        actual.setBaja(localidad.getBaja());
-        return localidadRepository.save(actual);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        localidadRepository.deleteById(id);
+            actual.setNombre(updatedLocalidad.getNombre());
+            actual.setProvincia(updatedLocalidad.getProvincia());
+            actual.setBaja(updatedLocalidad.getBaja());
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+            throw new Exception("Error al actualizar la localidad: " + e.getMessage());
+        }
     }
 }

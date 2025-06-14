@@ -1,59 +1,43 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.ArticuloInsumo;
+import ElBuenSabor.ProyectoFinal.Entities.ArticuloManufacturado;
 import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
 import ElBuenSabor.ProyectoFinal.Repositories.ArticuloInsumoRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
-public class ArticuloInsumoServiceImpl implements ArticuloInsumoService {
+public class ArticuloInsumoServiceImpl extends BaseServiceImpl<ArticuloInsumo, Long> implements ArticuloInsumoService {
 
-    private final ArticuloInsumoRepository articuloInsumoRepository;
 
-    @Override
-    public ArticuloInsumo findById(Long id) {
-        return articuloInsumoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Artículo insumo no encontrado"));
+    public ArticuloInsumoServiceImpl(ArticuloInsumoRepository articuloInsumoRepository) {
+        super(articuloInsumoRepository); // ¡ESTO ES CRUCIAL!
     }
 
-    @Override
-    public List<ArticuloInsumo> findAll() {
-        return articuloInsumoRepository.findAll();
-    }
 
     @Override
-    public ArticuloInsumo save(ArticuloInsumo articuloInsumo) {
-        return articuloInsumoRepository.save(articuloInsumo);
-    }
+    @Transactional
+    public ArticuloInsumo update(Long id, ArticuloInsumo updated) throws Exception {
+        // Lógica de actualización específica para ArticuloManufacturado
+        // Puedes llamar a super.update(id, updated) o implementar la lógica
+        // que involucre los detalles aquí, como ya te había mostrado.
+        ArticuloInsumo actual = findById(id); // Usa el findById del padre
 
-    @Override
-    public ArticuloInsumo update(Long id, ArticuloInsumo updated) {
-        ArticuloInsumo actual = findById(id);
-
+        actual.setDenominacion(updated.getDenominacion());
+        actual.setPrecioVenta(updated.getPrecioVenta());
         actual.setPrecioCompra(updated.getPrecioCompra());
         actual.setStockActual(updated.getStockActual());
         actual.setStockMinimo(updated.getStockMinimo());
         actual.setEsParaElaborar(updated.getEsParaElaborar());
-        actual.setDenominacion(updated.getDenominacion());
-        actual.setPrecioVenta(updated.getPrecioVenta());
         actual.setCategoria(updated.getCategoria());
         actual.setUnidadMedida(updated.getUnidadMedida());
         actual.setImagen(updated.getImagen());
 
-        return articuloInsumoRepository.save(actual);
-    }
 
-    @Override
-    public void deleteById(Long id) {
-        articuloInsumoRepository.deleteById(id);
-    }
-
-    @Override
-    public List<ArticuloInsumo> findByStockActualLessThanEqual(Double stockMinimo) {
-        return articuloInsumoRepository.findByStockActualLessThanEqual(stockMinimo);
+        return baseRepository.save(actual); // <-- AQUÍ ES DONDE DEBE IR
     }
 }

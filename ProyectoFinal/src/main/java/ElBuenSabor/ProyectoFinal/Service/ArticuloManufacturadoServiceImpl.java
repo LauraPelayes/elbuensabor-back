@@ -1,54 +1,54 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.ArticuloManufacturado;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Todavía útil si findById no viene del padre
 import ElBuenSabor.ProyectoFinal.Repositories.ArticuloManufacturadoRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List
 
 @Service
-@RequiredArgsConstructor
-public class ArticuloManufacturadoServiceImpl implements ArticuloManufacturadoService {
 
-    private final ArticuloManufacturadoRepository repository;
+public class ArticuloManufacturadoServiceImpl extends BaseServiceImpl<ArticuloManufacturado, Long> implements ArticuloManufacturadoService {
 
-    @Override
-    public ArticuloManufacturado findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Artículo manufacturado no encontrado"));
+    public ArticuloManufacturadoServiceImpl(ArticuloManufacturadoRepository articuloManufacturadoRepository) {
+        super(articuloManufacturadoRepository); // Llama al constructor de la clase base
     }
 
-    @Override
-    public List<ArticuloManufacturado> findAll() {
-        return repository.findAll();
-    }
+
 
     @Override
-    public ArticuloManufacturado save(ArticuloManufacturado articulo) {
-        return repository.save(articulo);
-    }
+    @Transactional
+    public ArticuloManufacturado update(Long id, ArticuloManufacturado updated) throws Exception { // <<-- Añadir throws Exception
+        try {
+            // Usamos findById del padre (BaseServiceImpl) para obtener la entidad actual
+            ArticuloManufacturado actual = findById(id);
 
-    @Override
-    public ArticuloManufacturado update(Long id, ArticuloManufacturado updated) {
-        ArticuloManufacturado actual = findById(id);
+            actual.setDenominacion(updated.getDenominacion());
+            actual.setPrecioVenta(updated.getPrecioVenta());
+            actual.setDescripcion(updated.getDescripcion());
+            actual.setTiempoEstimadoMinutos(updated.getTiempoEstimadoMinutos());
+            actual.setPreparacion(updated.getPreparacion());
+            actual.setCategoria(updated.getCategoria());
+            actual.setUnidadMedida(updated.getUnidadMedida());
+            actual.setImagen(updated.getImagen());
 
-        actual.setDenominacion(updated.getDenominacion());
-        actual.setPrecioVenta(updated.getPrecioVenta());
-        actual.setDescripcion(updated.getDescripcion());
-        actual.setTiempoEstimadoMinutos(updated.getTiempoEstimadoMinutos());
-        actual.setPreparacion(updated.getPreparacion());
-        actual.setCategoria(updated.getCategoria());
-        actual.setUnidadMedida(updated.getUnidadMedida());
-        actual.setImagen(updated.getImagen());
-        actual.setDetalles(updated.getDetalles());
+            // Lógica específica para manejar la colección 'detalles'
+            // Limpiamos los detalles existentes y añadimos los nuevos para asegurar la sincronización
+            if (updated.getDetalles() != null) {
+                actual.getDetalles().clear(); // Limpia los detalles existentes
+                updated.getDetalles().forEach(detalle -> {
+                    detalle.setArticuloManufacturado(actual); // Asegura la relación inversa
+                    actual.getDetalles().add(detalle);
+                });
+            }
 
-        return repository.save(actual);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        repository.deleteById(id);
+            // Llamamos a save del baseRepository (heredado del padre) para persistir los cambios
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+            // Re-lanzamos cualquier excepción, manteniendo la consistencia con BaseService.
+            throw new Exception("Error al actualizar el artículo manufacturado: " + e.getMessage());
+        }
     }
 }

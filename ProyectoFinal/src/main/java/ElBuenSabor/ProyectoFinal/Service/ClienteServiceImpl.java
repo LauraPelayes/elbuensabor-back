@@ -1,58 +1,55 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
-import ElBuenSabor.ProyectoFinal.Entities.*; // Importa todas las entidades
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
-import ElBuenSabor.ProyectoFinal.Repositories.*; // Importa todos los repositorios
-import lombok.RequiredArgsConstructor;
-
+import ElBuenSabor.ProyectoFinal.Entities.Cliente;
+// ResourceNotFoundException ya se maneja en BaseServiceImpl
+// import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Repositories.ClienteRepository;
+// Ya no es necesario si se inyecta por constructor explícito al padre
+// import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class ClienteServiceImpl implements ClienteService {
+// ClienteServiceImpl ahora extiende BaseServiceImpl
+// y la interfaz ClienteService (que debe extender BaseService)
+public class ClienteServiceImpl extends BaseServiceImpl<Cliente, Long> implements ClienteService {
 
-    private final ClienteRepository clienteRepository;
 
-    @Override
-    public Cliente findById(Long id) {
-        return clienteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado"));
+    public ClienteServiceImpl(ClienteRepository clienteRepository) {
+        super(clienteRepository); // Llama al constructor de la clase base
     }
 
     @Override
-    public List<Cliente> findAll() {
-        return clienteRepository.findAll();
-    }
+    @Transactional
+    public Cliente update(Long id, Cliente updatedCliente) throws Exception {
+        try {
+            Cliente existente = findById(id);
 
-    @Override
-    public Cliente save(Cliente cliente) {
-        return clienteRepository.save(cliente);
-    }
+            existente.setNombre(updatedCliente.getNombre());
+            existente.setApellido(updatedCliente.getApellido());
+            existente.setTelefono(updatedCliente.getTelefono());
+            existente.setEmail(updatedCliente.getEmail());
 
-    @Override
-    public Cliente update(Long id, Cliente cliente) {
-        Cliente existente = this.findById(id);
+            existente.setFechaNacimiento(updatedCliente.getFechaNacimiento());
 
-        existente.setNombre(cliente.getNombre());
-        existente.setApellido(cliente.getApellido());
-        existente.setTelefono(cliente.getTelefono());
-        existente.setEmail(cliente.getEmail());
-        existente.setPassword(cliente.getPassword());
-        existente.setFechaNacimiento(cliente.getFechaNacimiento());
-        existente.setBaja(cliente.getBaja());
+            existente.setBaja(updatedCliente.getBaja());
+
+            existente.setImagen(updatedCliente.getImagen());
+            existente.setUsuario(updatedCliente.getUsuario());
+
+            if (updatedCliente.getDomicilios() != null) {
+                existente.getDomicilios().clear();
+                existente.getDomicilios().addAll(updatedCliente.getDomicilios());
+                existente.getDomicilios().forEach(domicilio -> domicilio.setCliente(existente));
+            }
 
 
-        existente.setImagen(cliente.getImagen());
-        existente.setUsuario(cliente.getUsuario());
-        existente.setDomicilios(cliente.getDomicilios());
 
-        return clienteRepository.save(existente);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        clienteRepository.deleteById(id);
+            return baseRepository.save(existente);
+        } catch (Exception e) {
+            throw new Exception("Error al actualizar el cliente: " + e.getMessage());
+        }
     }
 }

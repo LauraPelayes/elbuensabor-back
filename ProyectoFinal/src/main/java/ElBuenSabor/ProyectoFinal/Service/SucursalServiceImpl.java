@@ -1,50 +1,53 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
-import ElBuenSabor.ProyectoFinal.Entities.*;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
-import ElBuenSabor.ProyectoFinal.Repositories.*;
-import lombok.RequiredArgsConstructor;
+import ElBuenSabor.ProyectoFinal.Entities.Sucursal;
+import ElBuenSabor.ProyectoFinal.Entities.Categoria; // Importar Categoria
+import ElBuenSabor.ProyectoFinal.Entities.Promocion; // Importar Promocion
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
+import ElBuenSabor.ProyectoFinal.Repositories.SucursalRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.*;
+import java.time.LocalTime; // Importar LocalTime
+import java.util.List; // Importar List
+import java.util.Optional; // Importar Optional
 
 @Service
-@RequiredArgsConstructor
-public class SucursalServiceImpl implements SucursalService {
 
-    private final SucursalRepository sucursalRepository;
-
-    @Override
-    public List<Sucursal> findAll() {
-        return sucursalRepository.findAll();
+public class SucursalServiceImpl extends BaseServiceImpl<Sucursal, Long> implements SucursalService {
+    public SucursalServiceImpl(SucursalRepository sucursalRepository) {
+        super(sucursalRepository); // Llama al constructor de la clase base
     }
 
     @Override
-    public Sucursal findById(Long id) {
-        return sucursalRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Sucursal no encontrada con ID: " + id));
-    }
+    @Transactional
+    public Sucursal update(Long id, Sucursal updatedSucursal) throws Exception { // <<-- Añadir throws Exception
+        try {
 
-    @Override
-    public Sucursal save(Sucursal sucursal) {
-        return sucursalRepository.save(sucursal);
-    }
+            Sucursal actual = findById(id);
 
-    @Override
-    public Sucursal update(Long id, Sucursal sucursal) {
-        Sucursal actual = findById(id);
-        actual.setNombre(sucursal.getNombre());
-        actual.setHorarioApertura(sucursal.getHorarioApertura());
-        actual.setHorarioCierre(sucursal.getHorarioCierre());
-        actual.setDomicilio(sucursal.getDomicilio());
-        actual.setEmpresa(sucursal.getEmpresa());
-        actual.setCategorias(sucursal.getCategorias());
-        actual.setPromociones(sucursal.getPromociones());
-        return sucursalRepository.save(actual);
-    }
+            actual.setNombre(updatedSucursal.getNombre());
+            actual.setHorarioApertura(updatedSucursal.getHorarioApertura());
+            actual.setHorarioCierre(updatedSucursal.getHorarioCierre());
+            actual.setDomicilio(updatedSucursal.getDomicilio());
+            actual.setEmpresa(updatedSucursal.getEmpresa());
+            if (updatedSucursal.getCategorias() != null) {
+                actual.getCategorias().clear(); // Limpia las categorías existentes
+                actual.getCategorias().addAll(updatedSucursal.getCategorias()); // Agrega las nuevas
+            } else {
+                actual.getCategorias().clear(); // Si no se envían categorías, limpiar las existentes
+            }
 
-    @Override
-    public void deleteById(Long id) {
-        sucursalRepository.deleteById(id);
+            if (updatedSucursal.getPromociones() != null) {
+                actual.getPromociones().clear(); // Limpia las promociones existentes
+                actual.getPromociones().addAll(updatedSucursal.getPromociones()); // Agrega las nuevas
+            } else {
+                actual.getPromociones().clear(); // Si no se envían promociones, limpiar las existentes
+            }
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+            // Re-lanzamos cualquier excepción, manteniendo la consistencia con BaseService.
+            throw new Exception("Error al actualizar la sucursal: " + e.getMessage());
+        }
     }
 }

@@ -6,10 +6,10 @@ import lombok.experimental.SuperBuilder;
 import java.util.List;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArticuloManufacturadoCreateDTO {
+public class ArticuloManufacturadoCreateDTO extends ArticuloDTO {
 
     private String denominacion;
     private Double precioVenta;

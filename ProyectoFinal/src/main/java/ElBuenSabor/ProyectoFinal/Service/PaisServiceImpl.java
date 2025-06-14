@@ -1,44 +1,34 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.Pais;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.PaisRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class PaisServiceImpl implements PaisService {
 
-    private final PaisRepository paisRepository;
+public class PaisServiceImpl extends BaseServiceImpl<Pais, Long> implements PaisService {
 
-    @Override
-    public List<Pais> findAll() {
-        return paisRepository.findAll();
+    public PaisServiceImpl(PaisRepository paisRepository) {
+        super(paisRepository);
     }
 
     @Override
-    public Pais findById(Long id) {
-        return paisRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("País no encontrado con ID: " + id));
-    }
+    @Transactional
+    public Pais update(Long id, Pais updatedPais) throws Exception {
+        try {
+            Pais actual = findById(id);
 
-    @Override
-    public Pais save(Pais pais) {
-        return paisRepository.save(pais);
-    }
+            actual.setNombre(updatedPais.getNombre());
 
-    @Override
-    public Pais update(Long id, Pais pais) {
-        Pais actual = findById(id);
-        actual.setNombre(pais.getNombre());
-        return paisRepository.save(actual);
-    }
 
-    @Override
-    public void deleteById(Long id) {
-        paisRepository.deleteById(id);
+            return baseRepository.save(actual);
+        } catch (Exception e) {
+
+            throw new Exception("Error al actualizar el país: " + e.getMessage());
+        }
     }
 }

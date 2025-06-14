@@ -1,52 +1,39 @@
 package ElBuenSabor.ProyectoFinal.Service;
 
 import ElBuenSabor.ProyectoFinal.Entities.Factura;
-import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException; // Posiblemente ya no sea necesaria
 import ElBuenSabor.ProyectoFinal.Repositories.FacturaRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
-import java.util.List;
+import java.util.List; // Importar List si no se usara el findAll del padre
 
 @Service
-@RequiredArgsConstructor
-public class FacturaServiceImpl implements FacturaService {
 
-    private final FacturaRepository facturaRepository;
-
-    @Override
-    public List<Factura> findAll() {
-        return facturaRepository.findAll();
+public class FacturaServiceImpl extends BaseServiceImpl<Factura, Long> implements FacturaService {
+    public FacturaServiceImpl(FacturaRepository facturaRepository) {
+        super(facturaRepository);
     }
 
-    @Override
-    public Factura findById(Long id) {
-        return facturaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada con id " + id));
-    }
 
     @Override
-    public Factura save(Factura factura) {
-        return facturaRepository.save(factura);
-    }
+    @Transactional
+    public Factura update(Long id, Factura updatedFactura) throws Exception {
+        try {
+            Factura actual = findById(id);
 
-    @Override
-    public Factura update(Long id, Factura factura) {
-        Factura actual = findById(id);
+            actual.setFechaFacturacion(updatedFactura.getFechaFacturacion());
+            actual.setMpPaymentId(updatedFactura.getMpPaymentId());
+            actual.setMpMerchantOrderId(updatedFactura.getMpMerchantOrderId());
+            actual.setMpPreferenceId(updatedFactura.getMpPreferenceId());
+            actual.setMpPaymentType(updatedFactura.getMpPaymentType());
+            actual.setFormaPago(updatedFactura.getFormaPago());
+            actual.setTotalVenta(updatedFactura.getTotalVenta());
 
-        actual.setFechaFacturacion(factura.getFechaFacturacion());
-        actual.setMpPaymentId(factura.getMpPaymentId());
-        actual.setMpMerchantOrderId(factura.getMpMerchantOrderId());
-        actual.setMpPreferenceId(factura.getMpPreferenceId());
-        actual.setMpPaymentType(factura.getMpPaymentType());
-        actual.setFormaPago(factura.getFormaPago());
-        actual.setTotalVenta(factura.getTotalVenta());
+            return baseRepository.save(actual);
+        } catch (Exception e) {
 
-        return facturaRepository.save(actual);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        facturaRepository.deleteById(id);
+            throw new Exception("Error al actualizar la factura: " + e.getMessage());
+        }
     }
 }
