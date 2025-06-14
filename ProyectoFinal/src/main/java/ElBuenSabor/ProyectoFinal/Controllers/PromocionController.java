@@ -1,10 +1,16 @@
 package ElBuenSabor.ProyectoFinal.Controllers;
 
-import ElBuenSabor.ProyectoFinal.DTO.PromocionDTO;
+import ElBuenSabor.ProyectoFinal.DTO.*;
 import ElBuenSabor.ProyectoFinal.Entities.ArticuloManufacturado;
 import ElBuenSabor.ProyectoFinal.Entities.Promocion;
 import ElBuenSabor.ProyectoFinal.Entities.Sucursal;
+import ElBuenSabor.ProyectoFinal.Exceptions.ResourceNotFoundException;
+import ElBuenSabor.ProyectoFinal.Mappers.PromocionMapper;
+import ElBuenSabor.ProyectoFinal.Repositories.ArticuloManufacturadoRepository;
+import ElBuenSabor.ProyectoFinal.Repositories.ImagenRepository;
+import ElBuenSabor.ProyectoFinal.Repositories.SucursalRepository;
 import ElBuenSabor.ProyectoFinal.Service.PromocionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,175 +23,86 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 // Importaciones para el mapeo a DTOs de respuesta (si fueran diferentes o más complejos)
-import ElBuenSabor.ProyectoFinal.DTO.ArticuloManufacturadoDTO;
-import ElBuenSabor.ProyectoFinal.DTO.ImagenDTO;
-import ElBuenSabor.ProyectoFinal.DTO.SucursalDTO;
 
 
 @RestController
-@RequestMapping("/api/v1/promociones")
-@CrossOrigin(origins = "*") // Ajustar según necesidades
+@RequestMapping("/api/promociones")
+@RequiredArgsConstructor
 public class PromocionController {
 
-    @Autowired
-    private PromocionService promocionService;
+    private final PromocionService promocionService;
+    private final PromocionMapper promocionMapper;
 
-    // Endpoint para crear una nueva promoción
-    // Restringido a Administradores/Empleados con permisos
-    @PostMapping("")
-    public ResponseEntity<?> crearPromocion(@RequestBody PromocionDTO promocionDTO) {
-        try {
-            PromocionDTO nuevaPromocion = promocionService.createPromocion(promocionDTO);
-            return new ResponseEntity<>(nuevaPromocion, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    private final ImagenRepository imagenRepository;
+    private final ArticuloManufacturadoRepository articuloRepo;
+    private final SucursalRepository sucursalRepository;
+
+    // Crear promoción
+    @PostMapping
+    public ResponseEntity<PromocionDTO> create(@RequestBody PromocionCreateDTO dto) {
+        Promocion promocion = promocionMapper.toEntity(dto);
+
+        if (dto.getImagenId() != null) {
+            promocion.setImagen(imagenRepository.findById(dto.getImagenId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada")));
         }
+
+        if (dto.getArticuloManufacturadoIds() != null) {
+            List<ArticuloManufacturado> articulos = articuloRepo.findAllById(dto.getArticuloManufacturadoIds());
+            promocion.setArticulosManufacturados(articulos);
+        }
+
+        if (dto.getSucursalIds() != null) {
+            List<Sucursal> sucursales = sucursalRepository.findAllById(dto.getSucursalIds());
+            promocion.setSucursales(sucursales);
+        }
+
+        Promocion saved = promocionService.save(promocion);
+        return ResponseEntity.status(HttpStatus.CREATED).body(promocionMapper.toDTO(saved));
     }
 
-    // Endpoint para obtener una promoción por su ID
+    // Obtener todas
+    @GetMapping
+    public ResponseEntity<List<PromocionDTO>> getAll() {
+        List<Promocion> promociones = promocionService.findAll();
+        return ResponseEntity.ok(promocionMapper.toDTOList(promociones));
+    }
+
+    // Obtener por ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerPromocionPorId(@PathVariable Long id) {
-        try {
-            // El PromocionService ya devuelve PromocionDTO en sus métodos find
-            // o podemos convertir la entidad si findById devuelve la entidad.
-            // Asumiendo que el servicio devuelve PromocionDTO o tenemos un helper
-            Optional<Promocion> promocionOptional = promocionService.findById(id);
-            if (promocionOptional.isPresent()) {
-                return ResponseEntity.ok(convertToPromocionDTO(promocionOptional.get()));
-            } else {
-                return new ResponseEntity<>("Promoción no encontrada.", HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<PromocionDTO> getById(@PathVariable Long id) {
+        Promocion promocion = promocionService.findById(id);
+        return ResponseEntity.ok(promocionMapper.toDTO(promocion));
     }
 
-    // Endpoint para actualizar una promoción
-    // Restringido a Administradores/Empleados con permisos
+    // Actualizar
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarPromocion(@PathVariable Long id, @RequestBody PromocionDTO promocionDTO) {
-        try {
-            PromocionDTO promocionActualizada = promocionService.updatePromocion(id, promocionDTO);
-            return ResponseEntity.ok(promocionActualizada);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<PromocionDTO> update(@PathVariable Long id, @RequestBody PromocionCreateDTO dto) {
+        Promocion promocion = promocionMapper.toEntity(dto);
+
+        if (dto.getImagenId() != null) {
+            promocion.setImagen(imagenRepository.findById(dto.getImagenId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada")));
         }
+
+        if (dto.getArticuloManufacturadoIds() != null) {
+            List<ArticuloManufacturado> articulos = articuloRepo.findAllById(dto.getArticuloManufacturadoIds());
+            promocion.setArticulosManufacturados(articulos);
+        }
+
+        if (dto.getSucursalIds() != null) {
+            List<Sucursal> sucursales = sucursalRepository.findAllById(dto.getSucursalIds());
+            promocion.setSucursales(sucursales);
+        }
+
+        Promocion updated = promocionService.update(id, promocion);
+        return ResponseEntity.ok(promocionMapper.toDTO(updated));
     }
 
-    // Endpoint para listar todas las promociones
-    @GetMapping("")
-    public ResponseEntity<?> listarPromociones(
-            @RequestParam(required = false) Long sucursalId,
-            @RequestParam(required = false) Boolean activas) {
-        try {
-            List<PromocionDTO> promociones;
-            if (sucursalId != null) {
-                promociones = promocionService.findPromocionesBySucursalId(sucursalId); //
-                if (activas != null && activas) {
-                    LocalDate hoy = LocalDate.now();
-                    LocalTime ahora = LocalTime.now();
-                    promociones = promociones.stream()
-                            .filter(p -> !hoy.isBefore(p.getFechaDesde()) && !hoy.isAfter(p.getFechaHasta()))
-                            .filter(p -> {
-                                if (p.getHoraDesde() == null && p.getHoraHasta() == null) return true;
-                                if (p.getHoraDesde() != null && p.getHoraHasta() == null) return !ahora.isBefore(p.getHoraDesde());
-                                if (p.getHoraDesde() == null && p.getHoraHasta() != null) return !ahora.isAfter(p.getHoraHasta());
-                                return !ahora.isBefore(p.getHoraDesde()) && !ahora.isAfter(p.getHoraHasta());
-                            })
-                            .collect(Collectors.toList());
-                }
-            } else if (activas != null && activas) {
-                promociones = promocionService.findActivePromociones(LocalDate.now(), LocalTime.now()); //
-            } else {
-                List<Promocion> todas = promocionService.findAll();
-                promociones = todas.stream().map(this::convertToPromocionDTO).collect(Collectors.toList());
-            }
-            return ResponseEntity.ok(promociones);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    // Endpoint para obtener promociones activas (en general, no por sucursal específica a menos que se filtre)
-    @GetMapping("/activas")
-    public ResponseEntity<?> listarPromocionesActivas() {
-        try {
-            List<PromocionDTO> promocionesActivas = promocionService.findActivePromociones(LocalDate.now(), LocalTime.now()); //
-            return ResponseEntity.ok(promocionesActivas);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    // Endpoint para eliminar una promoción
-    // Restringido a Administradores/Empleados con permisos
+    // Eliminar
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarPromocion(@PathVariable Long id) {
-        try {
-            // Considerar si una promoción puede ser eliminada si ya fue usada en pedidos, etc.
-            // Podría ser mejor un borrado lógico (campo 'activa' o 'baja').
-            boolean eliminado = promocionService.delete(id);
-            if (eliminado) {
-                return ResponseEntity.ok("Promoción eliminada correctamente.");
-            } else {
-                return new ResponseEntity<>("Promoción no encontrada para eliminar.", HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    // --- Helper para convertir Entidad a DTO ---
-    // El PromocionServiceImpl ya tiene un convertToDTO, idealmente lo usaríamos desde ahí.
-    // Si no, lo replicamos o lo hacemos más simple aquí.
-    private PromocionDTO convertToPromocionDTO(Promocion promocion) {
-        if (promocion == null) return null;
-        // Esta conversión ya está detallada en PromocionServiceImpl.
-        // Si PromocionService.findById() devuelve PromocionDTO, no necesitas esto aquí.
-        // Si devuelve la entidad, entonces sí.
-        PromocionDTO dto = new PromocionDTO();
-        dto.setId(promocion.getId());
-        dto.setDenominacion(promocion.getDenominacion());
-        dto.setFechaDesde(promocion.getFechaDesde());
-        dto.setFechaHasta(promocion.getFechaHasta());
-        dto.setHoraDesde(promocion.getHoraDesde());
-        dto.setHoraHasta(promocion.getHoraHasta());
-        dto.setDescripcionDescuento(promocion.getDescripcionDescuento());
-        dto.setPrecioPromocional(promocion.getPrecioPromocional());
-        dto.setTipoPromocion(promocion.getTipoPromocion());
-
-        if (promocion.getImagen() != null) {
-            ImagenDTO imgDto = new ImagenDTO();
-            imgDto.setId(promocion.getImagen().getId());
-            imgDto.setDenominacion(promocion.getImagen().getDenominacion());
-            dto.setImagen(imgDto);
-            dto.setImagenId(imgDto.getId());
-        }
-
-        if (promocion.getArticulosManufacturados() != null && !promocion.getArticulosManufacturados().isEmpty()) { //
-            dto.setArticuloManufacturadoIds(promocion.getArticulosManufacturados().stream().map(ArticuloManufacturado::getId).collect(Collectors.toList())); //
-            // Para DTOs completos de artículo:
-            // dto.setArticulosManufacturados(promocion.getArticulosManufacturados().stream().map(am -> {
-            //    ArticuloManufacturadoDTO amDto = new ArticuloManufacturadoDTO();
-            //    amDto.setId(am.getId());
-            //    amDto.setDenominacion(am.getDenominacion());
-            //    // ...otros campos necesarios
-            //    return amDto;
-            // }).collect(Collectors.toList()));
-        }
-
-        if (promocion.getSucursales() != null && !promocion.getSucursales().isEmpty()) { //
-            dto.setSucursalIds(promocion.getSucursales().stream().map(Sucursal::getId).collect(Collectors.toSet())); //
-            // Para DTOs completos de sucursal:
-            // dto.setSucursales(promocion.getSucursales().stream().map(s -> {
-            //    SucursalDTO sDto = new SucursalDTO();
-            //    sDto.setId(s.getId());
-            //    sDto.setNombre(s.getNombre());
-            //    // ...otros campos necesarios
-            //    return sDto;
-            // }).collect(Collectors.toSet()));
-        }
-        return dto;
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        promocionService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

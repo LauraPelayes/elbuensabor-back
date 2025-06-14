@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoriaCreateUpdateDTO {
+public class CategoriaShortDTO {
     //RequestDTO
     private String denominacion;
     private Long categoriaPadreId; // Null if it's a top-level category

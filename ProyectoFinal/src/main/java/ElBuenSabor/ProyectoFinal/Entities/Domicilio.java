@@ -2,6 +2,7 @@ package ElBuenSabor.ProyectoFinal.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,6 +26,11 @@ public class Domicilio extends BaseEntity {
     @JoinColumn(name = "localidad_id")
     private Localidad localidad;
 
-    @OneToMany(mappedBy = "domicilioEntrega", cascade = CascadeType.ALL, orphanRemoval = true) // <--- ¡Aquí está el error!
-    private Set<Pedido> pedidos = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
+    @OneToMany(mappedBy = "domicilioEntrega")
+    private List<Pedido> pedidos;
+
 }

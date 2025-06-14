@@ -1,22 +1,23 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalTime;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SucursalCreateUpdateDTO {
-    //RequestDTO
+public class SucursalCreateDTO {
+
     private String nombre;
     private LocalTime horarioApertura;
     private LocalTime horarioCierre;
-    private DomicilioCreateUpdateDTO domicilio; // Create/Update Domicilio along with Sucursal
+
+    private Long domicilioId;
     private Long empresaId;
+
     private List<Long> categoriaIds;
+    private List<Long> promocionIds;
 }

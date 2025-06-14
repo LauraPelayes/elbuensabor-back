@@ -11,17 +11,18 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteResponseDTO {
-    private Long id; // from BaseEntity, then Usuario
+public class ClienteDTO {
+
+    private Long id;
     private String nombre;
     private String apellido;
     private String telefono;
     private String email;
     private LocalDate fechaNacimiento;
-    private String username; // from Usuario
-    private String auth0Id;  // from Usuario
-    private ImagenDTO imagen;
-    private List<DomicilioDTO> domicilios;
     private boolean estaDadoDeBaja;
-    // Potentially roles or other user-specific info if not client-specific
+
+    private ImagenDTO imagen;
+    private UsuarioDTO usuario;
+    private List<DomicilioDTO> domicilios;
+
 }

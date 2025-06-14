@@ -1,17 +1,14 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LocalidadDTO {
+
     private Long id;
     private String nombre;
-    private Long provinciaId; // For request
-    private ProvinciaDTO provincia; // For response
+    private ProvinciaDTO provincia;
 }

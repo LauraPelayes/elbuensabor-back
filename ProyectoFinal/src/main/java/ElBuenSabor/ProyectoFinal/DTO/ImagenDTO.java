@@ -1,15 +1,12 @@
 package ElBuenSabor.ProyectoFinal.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImagenDTO {
     private Long id;
-    private String denominacion; // URL or identifier
+    private String denominacion;
 }
