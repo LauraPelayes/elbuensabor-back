@@ -9,16 +9,15 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class ArticuloInsumoDTO {
 
-    private Long id;
     private String denominacion;
-    private Double precioVenta;
-    private Long imagenId;
-    private Long unidadMedidaId;
-    private Long categoriaId;
-
     private Double precioCompra;
     private Double stockActual;
     private Double stockMinimo;
     private Boolean esParaElaborar;
+
+    private Double precioVenta;
+    private Long imagenId;
+    private Long unidadMedidaId;
+    private Long categoriaId;
 
 }
