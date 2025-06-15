@@ -54,5 +54,4 @@ public class Cliente extends BaseEntity {
     @JoinColumn(name = "imagen_id")
     private Imagen imagen;
 
-    private boolean estaDadoDeBaja = false;
 }
