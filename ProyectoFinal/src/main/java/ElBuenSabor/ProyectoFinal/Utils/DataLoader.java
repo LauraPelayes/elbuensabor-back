@@ -3,15 +3,22 @@ package ElBuenSabor.ProyectoFinal.Utils;
 import ElBuenSabor.ProyectoFinal.Entities.*;
 import ElBuenSabor.ProyectoFinal.Service.*;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;  // Para manejo de fecha y hora juntos
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.time.LocalTime;
 
 @Component
 public class DataLoader implements CommandLineRunner {
+
+    @Value("${app.data.loader.enabled:false}")
+    private boolean dataLoaderEnabled;
 
     private final PaisService paisService;
     private final ProvinciaService provinciaService;
@@ -25,6 +32,8 @@ public class DataLoader implements CommandLineRunner {
     private final ArticuloManufacturadoService articuloManufacturadoService;
     private final ArticuloManufacturadoDetalleService articuloManufacturadoDetalleService;
     private final DomicilioService domicilioService;
+    private final PromocionService promocionService;
+    private final SucursalService sucursalService;
 
     public DataLoader(PaisService paisService,
                       ProvinciaService provinciaService,
@@ -37,7 +46,9 @@ public class DataLoader implements CommandLineRunner {
                       ArticuloInsumoService articuloInsumoService,
                       ArticuloManufacturadoService articuloManufacturadoService,
                       ArticuloManufacturadoDetalleService articuloManufacturadoDetalleService,
-                      DomicilioService domicilioService) {
+                      DomicilioService domicilioService,
+                      PromocionService promocionService,
+                      SucursalService sucursalService) {
         this.paisService = paisService;
         this.provinciaService = provinciaService;
         this.localidadService = localidadService;
@@ -50,11 +61,23 @@ public class DataLoader implements CommandLineRunner {
         this.articuloManufacturadoService = articuloManufacturadoService;
         this.articuloManufacturadoDetalleService = articuloManufacturadoDetalleService;
         this.domicilioService = domicilioService;
+        this.promocionService = promocionService;
+        this.sucursalService = sucursalService;
     }
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        if (!dataLoaderEnabled) {
+            System.out.println("DataLoader está deshabilitado. Saltando la carga de datos.");
+            return;
+        }
+
+        if (existenDatosIniciales()) {
+            System.out.println("Los datos iniciales ya existen. Saltando la carga de datos.");
+            return;
+        }
+
         System.out.println("Cargando datos de ejemplo...");
 
         try {
@@ -68,6 +91,7 @@ public class DataLoader implements CommandLineRunner {
             Imagen imgHarina = imagenService.save(Imagen.builder().denominacion("https://example.com/harina.jpg").build());
             Imagen imgTomate = imagenService.save(Imagen.builder().denominacion("https://example.com/tomate.jpg").build());
             Imagen imgHamburguesa = imagenService.save(Imagen.builder().denominacion("https://example.com/hamburguesa.jpg").build());
+            Imagen imgPromo = imagenService.save(Imagen.builder().denominacion("https://example.com/promo.jpg").build());
 
             // 3. Domicilio
             Domicilio domicilioCliente = domicilioService.save(Domicilio.builder()
@@ -81,7 +105,6 @@ public class DataLoader implements CommandLineRunner {
             Usuario usuarioCliente = usuarioService.save(Usuario.builder()
                     .auth0Id("auth0|123456789")
                     .username("cliente_test")
-
                     .build());
 
             // 5. Cliente asociado al Usuario
@@ -90,7 +113,7 @@ public class DataLoader implements CommandLineRunner {
                     .apellido("Brizuela")
                     .telefono("2615551234")
                     .email("gastonsisterna30@gmail.com")
-                    .password("cliente123") // clave que usás en Postman
+                    .password("cliente123")
                     .fechaNacimiento(LocalDate.of(1990, 5, 15))
                     .imagen(imgCliente)
                     .usuario(usuarioCliente)
@@ -142,8 +165,16 @@ public class DataLoader implements CommandLineRunner {
                     .build();
 
             Set<ArticuloManufacturadoDetalle> detalles = new HashSet<>();
-            detalles.add(ArticuloManufacturadoDetalle.builder().cantidad(200.0).articuloInsumo(insumoHarina).articuloManufacturado(hamburguesa).build());
-            detalles.add(ArticuloManufacturadoDetalle.builder().cantidad(50.0).articuloInsumo(insumoTomate).articuloManufacturado(hamburguesa).build());
+            detalles.add(ArticuloManufacturadoDetalle.builder()
+                    .cantidad(200.0)
+                    .articuloInsumo(insumoHarina)
+                    .articuloManufacturado(hamburguesa)
+                    .build());
+            detalles.add(ArticuloManufacturadoDetalle.builder()
+                    .cantidad(50.0)
+                    .articuloInsumo(insumoTomate)
+                    .articuloManufacturado(hamburguesa)
+                    .build());
 
             hamburguesa.setDetalles(detalles);
             articuloManufacturadoService.save(hamburguesa);
@@ -151,14 +182,52 @@ public class DataLoader implements CommandLineRunner {
             // 9. Usuario ADMIN
             Usuario adminUsuario = Usuario.builder()
                     .username("admin@buen.com")
-
                     .build();
             usuarioService.save(adminUsuario);
+
+            // 10. Sucursal
+            Sucursal sucursal = Sucursal.builder()
+                    .nombre("Sucursal Centro")
+                    .domicilio(domicilioCliente)
+                    .build();
+            sucursalService.save(sucursal);
+
+            // 11. Promociones
+            Promocion promoDescuento = Promocion.builder()
+                    .denominacion("2x1 en Hamburguesas")
+                    .fechaDesde(LocalDate.now())
+                    .fechaHasta(LocalDate.now().plusMonths(1))
+                    .horaDesde(LocalTime.of(12, 0))
+                    .horaHasta(LocalTime.of(23, 0))
+                    .descripcionDescuento("Llevá 2 hamburguesas y pagá solo 1")
+                    .tipoPromocion(TipoPromocion.DESCUENTO_CANTIDAD)
+                    .cantidadMinima(2)
+                    .porcentajeDescuento(50.0)
+                    .imagen(imgPromo)
+                    .articulosManufacturados(List.of(hamburguesa))
+                    .sucursales(List.of(sucursal))
+                    .build();
+
+            promocionService.save(promoDescuento);
 
             System.out.println("Datos de ejemplo cargados exitosamente.");
         } catch (Exception e) {
             System.err.println("Error al cargar datos de ejemplo: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private boolean existenDatosIniciales() {
+        try {
+            boolean hayPaises = !paisService.findAll().isEmpty();
+            boolean hayUsuarios = !usuarioService.findAll().isEmpty();
+            boolean hayArticulos = !articuloManufacturadoService.findAll().isEmpty();
+            boolean hayPromociones = !promocionService.findAll().isEmpty();
+
+            return hayPaises || hayUsuarios || hayArticulos || hayPromociones;
+        } catch (Exception e) {
+            System.err.println("Error al verificar datos existentes: " + e.getMessage());
+            return false;
         }
     }
 }

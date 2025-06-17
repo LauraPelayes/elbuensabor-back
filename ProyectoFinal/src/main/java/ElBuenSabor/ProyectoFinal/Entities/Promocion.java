@@ -27,6 +27,12 @@ public class Promocion extends BaseEntity {
     private LocalTime horaHasta;
     private String descripcionDescuento;
     private Double precioPromocional;
+    // Nuevos campos para las promociones
+    private Integer cantidadMinima;        // Cantidad mínima de artículos para la promoción
+    private Double porcentajeDescuento;    // Para descuentos porcentuales
+    private Double montoMinimo;            // Para promociones basadas en monto
+    private String articuloRegalo;
+
 
     @Enumerated(EnumType.STRING)
     private TipoPromocion tipoPromocion; // happyHour, promocionGeneral [cite: 249]
@@ -45,4 +51,6 @@ public class Promocion extends BaseEntity {
 
     @ManyToMany(mappedBy = "promociones") // Mapeado por el campo 'promociones' en la entidad Sucursal
     private List<Sucursal> sucursales = new ArrayList<>();
+
+
 }
