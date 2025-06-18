@@ -8,11 +8,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;  // Para manejo de fecha y hora juntos
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.time.LocalTime;
+import java.util.*;
 
 @Component
 public class DataLoader implements CommandLineRunner {
@@ -81,136 +78,69 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("Cargando datos de ejemplo...");
 
         try {
-            // 1. Ubicación
             Pais pais = paisService.save(Pais.builder().nombre("Argentina").build());
             Provincia provincia = provinciaService.save(Provincia.builder().nombre("Mendoza").pais(pais).build());
             Localidad localidad = localidadService.save(Localidad.builder().nombre("Maipú").provincia(provincia).build());
 
-            // 2. Imágenes
-            Imagen imgCliente = imagenService.save(Imagen.builder().denominacion("https://example.com/cliente.jpg").build());
-            Imagen imgHarina = imagenService.save(Imagen.builder().denominacion("https://example.com/harina.jpg").build());
-            Imagen imgTomate = imagenService.save(Imagen.builder().denominacion("https://example.com/tomate.jpg").build());
-            Imagen imgHamburguesa = imagenService.save(Imagen.builder().denominacion("https://example.com/hamburguesa.jpg").build());
+            Imagen img1 = imagenService.save(Imagen.builder().denominacion("https://example.com/img1.jpg").build());
+            Imagen img2 = imagenService.save(Imagen.builder().denominacion("https://example.com/img2.jpg").build());
+            Imagen img3 = imagenService.save(Imagen.builder().denominacion("https://example.com/img3.jpg").build());
             Imagen imgPromo = imagenService.save(Imagen.builder().denominacion("https://example.com/promo.jpg").build());
 
-            // 3. Domicilio
-            Domicilio domicilioCliente = domicilioService.save(Domicilio.builder()
-                    .calle("Calle Falsa")
-                    .numero(123)
-                    .cp(5515)
-                    .localidad(localidad)
-                    .build());
+            Categoria categoria = categoriaService.save(Categoria.builder().denominacion("Comida").build());
+            UnidadMedida unidad = unidadMedidaService.save(UnidadMedida.builder().denominacion("unidad").build());
 
-            // 4. Usuario CLIENTE
-            Usuario usuarioCliente = usuarioService.save(Usuario.builder()
-                    .auth0Id("auth0|123456789")
-                    .username("cliente_test")
-                    .build());
-
-            // 5. Cliente asociado al Usuario
-            Cliente cliente = Cliente.builder()
-                    .nombre("Fiamma")
-                    .apellido("Brizuela")
-                    .telefono("2615551234")
-                    .email("gastonsisterna30@gmail.com")
-                    .password("cliente123")
-                    .fechaNacimiento(LocalDate.of(1990, 5, 15))
-                    .imagen(imgCliente)
-                    .usuario(usuarioCliente)
-                    .domicilios(Set.of(domicilioCliente))
-                    .build();
-
-            clienteService.save(cliente);
-
-            // 6. Categoría y Unidades
-            Categoria categoriaComida = categoriaService.save(Categoria.builder().denominacion("Comida").build());
-            UnidadMedida unidadGramos = unidadMedidaService.save(UnidadMedida.builder().denominacion("gramos").build());
-            UnidadMedida unidadPorcion = unidadMedidaService.save(UnidadMedida.builder().denominacion("unidad").build());
-
-            // 7. Insumos
-            ArticuloInsumo insumoHarina = articuloInsumoService.save(ArticuloInsumo.builder()
-                    .denominacion("Harina")
-                    .precioVenta(500.0)
-                    .precioCompra(300.0)
-                    .stockActual(1000.0)
-                    .stockMinimo(200.0)
-                    .esParaElaborar(true)
-                    .categoria(categoriaComida)
-                    .unidadMedida(unidadGramos)
-                    .imagen(imgHarina)
-                    .build());
-
-            ArticuloInsumo insumoTomate = articuloInsumoService.save(ArticuloInsumo.builder()
-                    .denominacion("Tomate")
-                    .precioVenta(100.0)
-                    .precioCompra(50.0)
-                    .stockActual(500.0)
-                    .stockMinimo(100.0)
-                    .esParaElaborar(true)
-                    .categoria(categoriaComida)
-                    .unidadMedida(unidadGramos)
-                    .imagen(imgTomate)
-                    .build());
-
-            // 8. Artículo Manufacturado
-            ArticuloManufacturado hamburguesa = ArticuloManufacturado.builder()
+            ArticuloManufacturado a1 = ArticuloManufacturado.builder()
                     .denominacion("Hamburguesa Clásica")
-                    .precioVenta(1250.0)
-                    .descripcion("Deliciosa hamburguesa con queso y lechuga")
+                    .precioVenta(1500.0)
+                    .descripcion("Hamburguesa con lechuga y tomate")
                     .tiempoEstimadoMinutos(20)
-                    .preparacion("Preparar la carne, cocinar, armar.")
-                    .categoria(categoriaComida)
-                    .unidadMedida(unidadPorcion)
-                    .imagen(imgHamburguesa)
+                    .preparacion("Cocinar y armar")
+                    .categoria(categoria)
+                    .unidadMedida(unidad)
+                    .imagen(img1)
                     .build();
 
-            Set<ArticuloManufacturadoDetalle> detalles = new HashSet<>();
-            detalles.add(ArticuloManufacturadoDetalle.builder()
-                    .cantidad(200.0)
-                    .articuloInsumo(insumoHarina)
-                    .articuloManufacturado(hamburguesa)
-                    .build());
-            detalles.add(ArticuloManufacturadoDetalle.builder()
-                    .cantidad(50.0)
-                    .articuloInsumo(insumoTomate)
-                    .articuloManufacturado(hamburguesa)
-                    .build());
-
-            hamburguesa.setDetalles(detalles);
-            articuloManufacturadoService.save(hamburguesa);
-
-            // 9. Usuario ADMIN
-            Usuario adminUsuario = Usuario.builder()
-                    .username("admin@buen.com")
+            ArticuloManufacturado a2 = ArticuloManufacturado.builder()
+                    .denominacion("Pizza Margarita")
+                    .precioVenta(2000.0)
+                    .descripcion("Pizza con queso y albahaca")
+                    .tiempoEstimadoMinutos(30)
+                    .preparacion("Hornear")
+                    .categoria(categoria)
+                    .unidadMedida(unidad)
+                    .imagen(img2)
                     .build();
-            usuarioService.save(adminUsuario);
 
-            // 10. Sucursal
-            Sucursal sucursal = Sucursal.builder()
-                    .nombre("Sucursal Centro")
-                    .domicilio(domicilioCliente)
+            ArticuloManufacturado a3 = ArticuloManufacturado.builder()
+                    .denominacion("Ensalada César")
+                    .precioVenta(1200.0)
+                    .descripcion("Ensalada con pollo y crutones")
+                    .tiempoEstimadoMinutos(15)
+                    .preparacion("Mezclar ingredientes")
+                    .categoria(categoria)
+                    .unidadMedida(unidad)
+                    .imagen(img3)
                     .build();
-            sucursalService.save(sucursal);
 
-            // 11. Promociones
-            Promocion promoDescuento = Promocion.builder()
-                    .denominacion("2x1 en Hamburguesas")
+            articuloManufacturadoService.save(a1);
+            articuloManufacturadoService.save(a2);
+            articuloManufacturadoService.save(a3);
+
+            Promocion promo = Promocion.builder()
+                    .denominacion("Happy Hour Promocional")
                     .fechaDesde(LocalDate.now())
-                    .fechaHasta(LocalDate.now().plusMonths(1))
-                    .horaDesde(LocalTime.of(12, 0))
-                    .horaHasta(LocalTime.of(23, 0))
-                    .descripcionDescuento("Llevá 2 hamburguesas y pagá solo 1")
-                    .tipoPromocion(TipoPromocion.DESCUENTO_CANTIDAD)
-                    .cantidadMinima(2)
-                    .porcentajeDescuento(50.0)
-                    .imagen(imgPromo)
-                    .articulosManufacturados(List.of(hamburguesa))
-                    .sucursales(List.of(sucursal))
+                    .fechaHasta(LocalDate.now().plusWeeks(2))
+                    .horaDesde(LocalTime.of(18, 0))
+                    .horaHasta(LocalTime.of(21, 0))
+                    .precioPromocional(1000.0)
+                    .tipoPromocion(TipoPromocion.HAPPY_HOUR)
+                    .articulosManufacturados(List.of(a1, a2))
                     .build();
 
-            promocionService.save(promoDescuento);
+            promocionService.save(promo);
 
-            System.out.println("Datos de ejemplo cargados exitosamente.");
+            System.out.println("Datos cargados correctamente.");
         } catch (Exception e) {
             System.err.println("Error al cargar datos de ejemplo: " + e.getMessage());
             e.printStackTrace();
@@ -219,15 +149,9 @@ public class DataLoader implements CommandLineRunner {
 
     private boolean existenDatosIniciales() {
         try {
-            boolean hayPaises = !paisService.findAll().isEmpty();
-            boolean hayUsuarios = !usuarioService.findAll().isEmpty();
-            boolean hayArticulos = !articuloManufacturadoService.findAll().isEmpty();
-            boolean hayPromociones = !promocionService.findAll().isEmpty();
-
-            return hayPaises || hayUsuarios || hayArticulos || hayPromociones;
+            return !articuloManufacturadoService.findAll().isEmpty();
         } catch (Exception e) {
-            System.err.println("Error al verificar datos existentes: " + e.getMessage());
-            return false;
+            return true;
         }
     }
 }

@@ -17,10 +17,8 @@ public interface PromocionMapper {
 
     List<PromocionDTO> toDTOList(List<Promocion> promociones);
 
-    @Mapping(target = "imagen", ignore = true)
     @Mapping(target = "articulosManufacturados", ignore = true)
     @Mapping(target = "sucursales", ignore = true)
     Promocion toEntity(PromocionCreateDTO dto);
-
 
 }
